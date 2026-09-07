@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>What's my French level? · FrenchVibes Academy</title>
+<style>
+:root{
+  --text:#2C2C2B;--muted:#7D7A75;--canvas:#FFFFFF;--soft:#F9F8F7;--surface2:#F0EFED;
+  --border:#E6E5E3;--blue:#2783DE;--blue-soft:#E5F2FC;--blue-line:#CFE6F9;
+  --green:#46A171;--green-soft:#E8F1EC;--violet:#7C3AED;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --text:#FFFFFF;--muted:rgba(255,255,255,.65);--canvas:#202020;--soft:#191919;--surface2:#383836;
+    --border:rgba(255,255,255,.20);--blue:#5E9FE8;--blue-soft:rgba(94,159,232,.12);--blue-line:rgba(94,159,232,.35);
+    --green:#72BC8F;--green-soft:rgba(114,188,143,.12);--violet:#C4B5FD;
+  }
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--soft);color:var(--text);
+  font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:820px;margin:0 auto;padding:20px 20px 26px}
+.card{background:var(--canvas);border:1px solid var(--border);border-radius:14px;padding:28px}
+h1{font-size:29px;line-height:1.2;margin:0 0 10px;letter-spacing:-.01em}
+.lead{color:var(--muted);margin:0 0 18px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 22px;padding:0;list-style:none}
+.chip{background:var(--surface2);border-radius:999px;padding:6px 12px;font-size:14px}
+.btn{appearance:none;border:0;cursor:pointer;font:inherit;font-weight:600;min-height:48px;
+  padding:12px 22px;border-radius:10px;background:var(--blue);color:#fff;text-decoration:none;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn:hover{filter:brightness(.94)}
+.btn.secondary{background:var(--surface2);color:var(--text)}
+.btn.ghost{background:transparent;color:var(--muted);font-weight:500;text-decoration:underline;padding:10px 2px;min-height:44px}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.qmeta{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin:0 0 14px;font-weight:600}
+.instr{font-size:14px;color:var(--muted);margin:0 0 12px}
+.ctx{background:var(--soft);border:1px solid var(--border);border-left:3px solid var(--blue);
+  border-radius:8px;padding:12px 14px;margin:0 0 14px;white-space:pre-line}
+.stem{font-size:21px;line-height:1.45;margin:0 0 18px;font-weight:500}
+.stem .gap{color:var(--blue);font-weight:700;letter-spacing:.05em}
+.ask{margin:0 0 16px;font-weight:600}
+.opts{display:grid;gap:10px}
+.opt{text-align:left;background:var(--canvas);border:1px solid var(--border);border-radius:10px;
+  padding:13px 16px;min-height:48px;font:inherit;color:var(--text);cursor:pointer;
+  display:flex;align-items:center;gap:12px;transition:border-color .15s,background .15s}
+.opt:hover{border-color:var(--blue);background:var(--blue-soft)}
+.opt.sel{border-color:var(--blue);background:var(--blue-soft)}
+.opt .k{font-size:12px;color:var(--muted);min-width:16px;font-weight:700}
+.dunno{margin-top:14px;background:transparent;border:1px dashed var(--border);color:var(--muted);
+  border-radius:10px;padding:12px 16px;min-height:48px;font:inherit;cursor:pointer;width:100%;text-align:center}
+.dunno:hover{border-color:var(--blue);color:var(--blue)}
+input[type=text]{width:100%;font:inherit;padding:13px 14px;border:1px solid var(--border);
+  border-radius:10px;background:var(--canvas);color:var(--text);min-height:48px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
+.hint{font-size:13px;color:var(--muted);margin-top:10px}
+.tokens{display:flex;flex-wrap:wrap;gap:8px}
+.tok{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;
+  min-height:44px;font:inherit;color:var(--text);cursor:pointer}
+.tok:hover{border-color:var(--blue)}
+.tok[disabled]{opacity:.3;cursor:default}
+.build{min-height:58px;border:1px dashed var(--border);border-radius:10px;padding:9px;display:flex;
+  flex-wrap:wrap;gap:8px;align-items:center;background:var(--soft);margin:0 0 12px}
+.build .ph{color:var(--muted);font-size:14px;padding-left:6px}
+.bt{background:var(--blue-soft);border:1px solid var(--blue);color:var(--text);border-radius:8px;
+  padding:9px 13px;min-height:42px;font:inherit;cursor:pointer}
+.tracker{margin:0 0 14px}
+#pathwrap svg{display:block;width:100%;height:auto}
+.seg{fill:none;stroke:var(--border);stroke-width:7;stroke-linecap:round}
+.seg.done{stroke:var(--green)}
+.seg.now{stroke:var(--blue)}
+.seg.skip{stroke-dasharray:2 13}
+.dot{fill:var(--border)}
+.dot.done{fill:var(--blue)}
+.dot.cur{fill:var(--blue)}
+.dot.skip{fill:var(--canvas);stroke:var(--border);stroke-width:2}
+.ring{fill:none;stroke:var(--blue);stroke-width:3;opacity:.3}
+.ms{fill:var(--canvas);stroke:var(--border);stroke-width:3}
+.ms.done{fill:var(--green-soft);stroke:var(--green)}
+.ms.now{fill:var(--blue-soft);stroke:var(--blue)}
+.mslab{font-size:15px;font-weight:700;fill:var(--muted);text-anchor:middle}
+.mslab.done{fill:var(--green)}
+.mslab.now{fill:var(--blue)}
+.msicon{font-size:19px;text-anchor:middle;dominant-baseline:central}
+.startlab{font-size:13px;fill:var(--muted);text-anchor:middle}
+.mini{display:none;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap}
+.mstone{font-size:13px;padding:6px 10px;border-radius:999px;background:var(--surface2);color:var(--muted)}
+.mstone.done{background:var(--green-soft);color:var(--green);font-weight:700}
+.mstone.now{background:var(--blue-soft);color:var(--blue);font-weight:700}
+.mdots{display:flex;gap:6px;margin-left:4px}
+.mdot{width:9px;height:9px;border-radius:50%;background:var(--border)}
+.mdot.done{background:var(--blue)}
+.mdot.now{background:var(--blue);box-shadow:0 0 0 4px var(--blue-soft)}
+.stagemeta{text-align:center;font-size:13px;color:var(--muted);margin:10px 0 0;font-weight:600}
+.badge{display:inline-flex;align-items:center;gap:10px;background:var(--green-soft);color:var(--green);
+  font-weight:700;border-radius:999px;padding:8px 16px;font-size:15px;margin:0 0 14px}
+.rtitle{font-size:25px;line-height:1.25;margin:0 0 10px}
+.panel{background:var(--soft);border:1px solid var(--border);border-radius:12px;padding:18px;margin:0 0 16px}
+.panel h3{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.panel ul{margin:0;padding-left:20px}
+.panel li{margin:0 0 6px}
+.panel li:last-child{margin:0}
+.cta{background:var(--blue-soft);border:1px solid var(--blue-line);border-radius:12px;padding:20px;margin:0 0 16px}
+.cta h3{margin:0 0 8px;font-size:19px}
+.cta p{margin:0 0 14px}
+.cta p:last-of-type{margin:0 0 16px}
+.kofi{color:var(--violet);font-weight:700;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:2px;border-radius:4px}
+.kofi:hover{background:rgba(124,58,237,.10)}
+.kofi:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
+.note{font-size:13px;color:var(--muted);margin:0}
+.celebrate{text-align:center;padding:10px 0 4px}
+.celebrate .big{font-size:52px;line-height:1;margin:0 0 14px}
+.foot{text-align:center;font-size:12px;color:var(--muted);margin:16px 0 0}
+@media(max-width:560px){
+  .wrap{padding:16px 16px 22px}.card{padding:20px}h1{font-size:23px}.rtitle{font-size:21px}
+  .stem{font-size:19px}#pathwrap{display:none}.mini{display:flex}
+}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="tracker" id="tracker" hidden>
+    <div id="pathwrap"></div>
+    <div class="mini" id="mini"></div>
+    <p class="stagemeta" id="stagemeta"></p>
+  </div>
+  <main class="card" id="screen" aria-live="polite"></main>
+  <p class="foot">FrenchVibes Academy - A quick estimate to point you in the right direction. This is not an official exam.</p>
+</div>
+<script>
+/* FrenchVibes Academy - level test question bank
+   4 stages (A1, A2, B1, B2) x 5 CEFR aspects x 10 questions = 200 questions.
+   Each round uses 2 questions per aspect (10 per stage) => 5 rounds with no repeats. */
+var BANK = {
+A1: [
+{id:"a1v1",aspect:"vocab",format:"mcq",instr:"Complete the sentence.",stem:"Je voudrais un ___, s'il vous plaît.",options:["café","baguette","pomme","glace"],answer:"café"},
+{id:"a1v2",aspect:"vocab",format:"type",instr:"Write the missing French word.",stem:"You are thirsty. You ask for a glass of ___ (water).",accept:["eau","l'eau","de l'eau","d'eau"]},
+{id:"a1v3",aspect:"vocab",format:"mcq",instr:"Which word is a colour?",options:["rouge","roue","rue","route"],answer:"rouge"},
+{id:"a1v4",aspect:"vocab",format:"mcq",instr:"What is this sentence about?",stem:"Il fait très chaud aujourd'hui.",options:["The weather","The price","A family member","The time"],answer:"The weather"},
+{id:"a1v5",aspect:"vocab",format:"type",instr:"Write the number in French words.",stem:"7 = ___",accept:["sept"]},
+{id:"a1v6",aspect:"vocab",format:"mcq",instr:"Complete the sentence.",stem:"Mon père et ma mère sont mes ___.",options:["parents","enfants","voisins","collègues"],answer:"parents"},
+{id:"a1v7",aspect:"vocab",format:"type",instr:"Write the missing French word.",stem:"At the bakery: « Une baguette, s'il vous ___. »",accept:["plaît","plait"]},
+{id:"a1v8",aspect:"vocab",format:"mcq",instr:"Which one means « a book »?",options:["un livre","une lettre","un lit","une liste"],answer:"un livre"},
+{id:"a1v9",aspect:"vocab",format:"mcq",instr:"Which day comes after « lundi »?",options:["mardi","dimanche","samedi","vendredi"],answer:"mardi"},
+{id:"a1v10",aspect:"vocab",format:"type",instr:"Write the number in French words.",stem:"12 = ___",accept:["douze"]},
+
+{id:"a1g1",aspect:"grammar",format:"mcq",instr:"Choose the correct form.",stem:"Je ___ français.",options:["parle","parles","parlons","parlez"],answer:"parle"},
+{id:"a1g2",aspect:"grammar",format:"mcq",instr:"Choose the correct subject pronoun.",stem:"___ s'appelle Marie.",options:["Elle","Ils","Nous","Vous"],answer:"Elle"},
+{id:"a1g3",aspect:"grammar",format:"mcq",instr:"Choose the correct form of « avoir ».",stem:"Nous ___ deux enfants.",options:["avons","avez","ont","êtes"],answer:"avons"},
+{id:"a1g4",aspect:"grammar",format:"type",instr:"Complete with the verb « être ».",stem:"Tu ___ étudiant.",accept:["es","tu es"]},
+{id:"a1g5",aspect:"grammar",format:"mcq",instr:"Choose the correct negative form.",stem:"Je ___ pas de frère.",options:["n'ai","ai","suis","n'est"],answer:"n'ai"},
+{id:"a1g6",aspect:"grammar",format:"mcq",instr:"Choose the correct form.",stem:"Elle ___ à Taipei.",options:["habite","habites","habitent","habitez"],answer:"habite"},
+{id:"a1g7",aspect:"grammar",format:"mcq",instr:"Choose the correct question word.",stem:"___ est ton nom ?",options:["Quel","Quelle","Qui","Où"],answer:"Quel"},
+{id:"a1g8",aspect:"grammar",format:"type",instr:"Complete with the verb « avoir ».",stem:"J'___ vingt ans.",accept:["ai","j'ai"]},
+{id:"a1g9",aspect:"grammar",format:"mcq",instr:"Choose the correct article.",stem:"C'est ___ amie de Paul.",options:["une","un","des","le"],answer:"une"},
+{id:"a1g10",aspect:"grammar",format:"mcq",instr:"Choose the correct form of « être ».",stem:"Nous ___ étudiants.",options:["sommes","est","ont","avez"],answer:"sommes"},
+
+{id:"a1r1",aspect:"reading",format:"mcq",instr:"Read the short dialogue.",ctx:"— Bonjour, vous vous appelez comment ?\n— Je m'appelle Léa Martin.",ask:"What is the second person doing?",options:["Giving their name","Giving their age","Ordering a drink","Asking the time"],answer:"Giving their name"},
+{id:"a1r2",aspect:"reading",format:"mcq",instr:"Read the short dialogue.",ctx:"— Un café et un croissant, s'il vous plaît.\n— Ça fait 4 euros 50.",ask:"Where are these people?",options:["In a café","At the doctor","At school","In a taxi"],answer:"In a café"},
+{id:"a1r3",aspect:"reading",format:"mcq",instr:"Read the short dialogue.",ctx:"— Tu habites où ?\n— À Taipei, avec ma sœur.",ask:"Who does this person live with?",options:["Their sister","Their brother","Their mother","Nobody"],answer:"Their sister"},
+{id:"a1r4",aspect:"reading",format:"mcq",instr:"Read the short dialogue.",ctx:"— Il est quelle heure ?\n— Il est huit heures et demie.",ask:"What time is it?",options:["8:30","8:15","9:30","7:30"],answer:"8:30"},
+{id:"a1r5",aspect:"reading",format:"mcq",instr:"Read this short introduction.",ctx:"Salut ! Je m'appelle Marc, j'ai 25 ans et je suis professeur de sport.",ask:"What is his job?",options:["Sports teacher","Student","Doctor","Cook"],answer:"Sports teacher"},
+{id:"a1r6",aspect:"reading",format:"mcq",instr:"Read the short dialogue.",ctx:"— Vous voulez boire quelque chose ?\n— Oui, un verre d'eau, s'il vous plaît.",ask:"What does the person want?",options:["A glass of water","A coffee","Nothing","The menu"],answer:"A glass of water"},
+{id:"a1r7",aspect:"reading",format:"mcq",instr:"Read this introduction.",ctx:"Bonjour, je m'appelle Chloé. Je suis française, mais j'habite à Taipei depuis trois ans.",ask:"Where does Chloé live?",options:["In Taipei","In France","In Japan","She doesn't say"],answer:"In Taipei"},
+{id:"a1r8",aspect:"reading",format:"mcq",instr:"Read the short dialogue.",ctx:"— Le train part à quelle heure ?\n— À dix heures dix, quai numéro 4.",ask:"Which platform is the train on?",options:["4","10","14","No platform is given"],answer:"4"},
+{id:"a1r9",aspect:"reading",format:"mcq",instr:"Read this text message.",ctx:"Je suis en retard, j'arrive dans dix minutes !",ask:"What is happening?",options:["The person will arrive late","The person cancels","The person is early","The person is lost"],answer:"The person will arrive late"},
+{id:"a1r10",aspect:"reading",format:"mcq",instr:"Read the short dialogue.",ctx:"— Tu as des frères et sœurs ?\n— Oui, deux frères, mais pas de sœur.",ask:"How many sisters does this person have?",options:["None","One","Two","Three"],answer:"None"},
+
+{id:"a1u1",aspect:"usage",format:"mcq",instr:"Someone says « Merci beaucoup ! » What do you answer?",options:["De rien","S'il vous plaît","Bonjour","Au revoir"],answer:"De rien"},
+{id:"a1u2",aspect:"usage",format:"mcq",instr:"You walk into a shop in the morning. What do you say?",options:["Bonjour","Bonne nuit","Bon appétit","Bienvenue"],answer:"Bonjour"},
+{id:"a1u3",aspect:"usage",format:"mcq",instr:"You want to know the price. What do you ask?",options:["C'est combien ?","C'est où ?","C'est qui ?","C'est quand ?"],answer:"C'est combien ?"},
+{id:"a1u4",aspect:"usage",format:"mcq",instr:"Someone asks you « Ça va ? » What is a natural answer?",options:["Ça va bien, merci","Il est trois heures","J'ai 30 ans","Je m'appelle Paul"],answer:"Ça va bien, merci"},
+{id:"a1u5",aspect:"usage",format:"mcq",instr:"Complete this polite order in a café.",stem:"Un thé, ___",options:["s'il vous plaît","de rien","à bientôt","bonne nuit"],answer:"s'il vous plaît"},
+{id:"a1u6",aspect:"usage",format:"mcq",instr:"You leave a shop in the evening. What do you say?",options:["Au revoir, bonne soirée !","Bonjour !","Bon appétit !","Enchanté !"],answer:"Au revoir, bonne soirée !"},
+{id:"a1u7",aspect:"usage",format:"mcq",instr:"You meet someone for the very first time. What do you say?",options:["Enchanté !","À demain !","Bon voyage !","Désolé !"],answer:"Enchanté !"},
+{id:"a1u8",aspect:"usage",format:"mcq",instr:"You didn't hear the price. What do you ask?",options:["Pardon, c'est combien ?","C'est fini ?","C'est loin ?","C'est bon ?"],answer:"Pardon, c'est combien ?"},
+{id:"a1u9",aspect:"usage",format:"mcq",instr:"At the table, just before eating, French people say…",options:["Bon appétit !","Bonne nuit !","Bon courage !","Bonne route !"],answer:"Bon appétit !"},
+{id:"a1u10",aspect:"usage",format:"mcq",instr:"You are looking for the toilets in a restaurant. What do you ask?",options:["Où sont les toilettes, s'il vous plaît ?","Qu'est-ce que c'est ?","Combien ça coûte ?","Quelle heure est-il ?"],answer:"Où sont les toilettes, s'il vous plaît ?"},
+
+{id:"a1s1",aspect:"structure",format:"order",instr:"Put the words in the correct order.",tokens:["Je","suis","professeur","de","français"],answers:["Je suis professeur de français"]},
+{id:"a1s2",aspect:"structure",format:"order",instr:"Put the words in the correct order.",tokens:["Tu","habites","à","Paris"],answers:["Tu habites à Paris"]},
+{id:"a1s3",aspect:"structure",format:"mcq",instr:"Which word is the verb?",stem:"Marie mange une pomme.",options:["mange","Marie","une","pomme"],answer:"mange"},
+{id:"a1s4",aspect:"structure",format:"mcq",instr:"What is the subject of this sentence?",stem:"Les enfants sont à l'école.",options:["Les enfants","sont","à","l'école"],answer:"Les enfants"},
+{id:"a1s5",aspect:"structure",format:"order",instr:"Put the words in the correct order.",tokens:["Nous","avons","deux","chats"],answers:["Nous avons deux chats"]},
+{id:"a1s6",aspect:"structure",format:"order",instr:"Put the words in the correct order.",tokens:["Elle","habite","dans","une","grande","maison"],answers:["Elle habite dans une grande maison"]},
+{id:"a1s7",aspect:"structure",format:"mcq",instr:"Which word is the verb?",stem:"Les enfants jouent dans le parc.",options:["jouent","enfants","parc","dans"],answer:"jouent"},
+{id:"a1s8",aspect:"structure",format:"order",instr:"Put the words in the correct order.",tokens:["Je","n'aime","pas","le","fromage"],answers:["Je n'aime pas le fromage"]},
+{id:"a1s9",aspect:"structure",format:"mcq",instr:"What is the subject of this sentence?",stem:"Mon frère travaille à Paris.",options:["Mon frère","travaille","à","Paris"],answer:"Mon frère"},
+{id:"a1s10",aspect:"structure",format:"order",instr:"Put the words in the correct order.",tokens:["Vous","avez","un","stylo"],answers:["Vous avez un stylo"]}
+],
+
+A2: [
+{id:"a2v1",aspect:"vocab",format:"mcq",instr:"Complete the sentence.",stem:"Hier, j'étais très ___ : j'ai travaillé douze heures.",options:["fatigué","tôt","souvent","prêt"],answer:"fatigué"},
+{id:"a2v2",aspect:"vocab",format:"type",instr:"Write the opposite of « toujours ».",stem:"toujours ≠ ___",accept:["jamais","ne jamais"]},
+{id:"a2v3",aspect:"vocab",format:"mcq",instr:"What does this sentence mean?",stem:"J'ai assisté à la réunion.",options:["I attended the meeting","I helped during the meeting","I insisted on the meeting","I missed the meeting"],answer:"I attended the meeting"},
+{id:"a2v4",aspect:"vocab",format:"mcq",instr:"Which one is a household chore?",options:["faire la vaisselle","faire la fête","faire du vélo","faire la queue"],answer:"faire la vaisselle"},
+{id:"a2v5",aspect:"vocab",format:"type",instr:"Write the missing place.",stem:"Je vais à la ___ pour acheter du pain.",accept:["boulangerie","la boulangerie"]},
+{id:"a2v6",aspect:"vocab",format:"mcq",instr:"Complete the sentence.",stem:"Il y a une grève, donc les trains sont ___.",options:["annulés","gratuits","rapides","ouverts"],answer:"annulés"},
+{id:"a2v7",aspect:"vocab",format:"type",instr:"Write the opposite of « facile ».",stem:"facile ≠ ___",accept:["difficile","dur","compliqué"]},
+{id:"a2v8",aspect:"vocab",format:"mcq",instr:"What does « avoir besoin de » mean?",options:["To need","To be able to","To be in a hurry","To be bored"],answer:"To need"},
+{id:"a2v9",aspect:"vocab",format:"mcq",instr:"Which one is about health?",options:["prendre rendez-vous chez le médecin","faire les courses","prendre le bus","ranger la chambre"],answer:"prendre rendez-vous chez le médecin"},
+{id:"a2v10",aspect:"vocab",format:"type",instr:"Write the missing place.",stem:"Je suis allé à la ___ pour envoyer une lettre.",accept:["poste","la poste"]},
+
+{id:"a2g1",aspect:"grammar",format:"mcq",instr:"Choose the correct past form.",stem:"Hier, je ___ au cinéma.",options:["suis allé","ai allé","vais","allais"],answer:"suis allé"},
+{id:"a2g2",aspect:"grammar",format:"mcq",instr:"Choose the correct auxiliary.",stem:"Elle ___ née en 1990.",options:["est","a","avait","sera"],answer:"est"},
+{id:"a2g3",aspect:"grammar",format:"type",instr:"Put the verb in the passé composé.",stem:"Nous ___ (manger) au restaurant.",accept:["avons mangé","nous avons mangé"]},
+{id:"a2g4",aspect:"grammar",format:"mcq",instr:"Choose the correct pronoun.",ctx:"— Tu aimes le chocolat ?\n— Oui, je ___ adore !",options:["l'","le","lui","y"],answer:"l'"},
+{id:"a2g5",aspect:"grammar",format:"mcq",instr:"Choose the correct form (near future).",stem:"Demain, je ___ voir mes amis.",options:["vais","vas","allons","allez"],answer:"vais"},
+{id:"a2g6",aspect:"grammar",format:"mcq",instr:"Choose the correct past form.",stem:"Quand j'étais petit, je ___ souvent au parc.",options:["allais","suis allé","irai","aille"],answer:"allais"},
+{id:"a2g7",aspect:"grammar",format:"mcq",instr:"Choose the correct form.",stem:"Il y a beaucoup ___ monde dans le métro.",options:["de","du","des","le"],answer:"de"},
+{id:"a2g8",aspect:"grammar",format:"type",instr:"Put the verb in the passé composé.",stem:"Elle ___ (partir) hier soir.",accept:["est partie","elle est partie"]},
+{id:"a2g9",aspect:"grammar",format:"mcq",instr:"Choose the correct comparative.",stem:"Ce livre est ___ intéressant que l'autre.",options:["plus","très","beaucoup","trop"],answer:"plus"},
+{id:"a2g10",aspect:"grammar",format:"mcq",instr:"Choose the correct negative word.",stem:"Je suis végétarien : je ne mange ___ de viande.",options:["jamais","toujours","souvent","déjà"],answer:"jamais"},
+
+{id:"a2r1",aspect:"reading",format:"mcq",instr:"Read this message.",ctx:"Salut Léa ! Je suis désolé, je ne peux pas venir dimanche, je dois travailler. On peut se voir lundi ?",ask:"Why can't he come on Sunday?",options:["He has to work","He is sick","He is travelling","He forgot"],answer:"He has to work"},
+{id:"a2r2",aspect:"reading",format:"mcq",instr:"Read the short dialogue.",ctx:"— Tu as passé un bon week-end ?\n— Bof. Il a plu tout le temps, alors on est restés à la maison.",ask:"What did they do?",options:["They stayed home because of the rain","They went hiking","They visited family","They went to the beach"],answer:"They stayed home because of the rain"},
+{id:"a2r3",aspect:"reading",format:"mcq",instr:"Read this small ad.",ctx:"Cherche colocataire. Chambre meublée, 400 €/mois, quartier calme, proche métro.",ask:"What is being offered?",options:["A furnished room to rent","An unfurnished room to rent","A furnished flat for sale","Someone looking for a room to rent"],answer:"A furnished room to rent"},
+{id:"a2r4",aspect:"reading",format:"mcq",instr:"Read the short dialogue.",ctx:"— Ça fait longtemps que tu apprends le français ?\n— Deux ans, mais j'ai arrêté pendant six mois.",ask:"What is true?",options:["Two years of study, with a 6-month break","Six months of study in total","Two months of study","Never studied French"],answer:"Two years of study, with a 6-month break"},
+{id:"a2r5",aspect:"reading",format:"mcq",instr:"Read this notice.",ctx:"Le magasin sera fermé le 14 juillet. Réouverture le 15 à 9 h.",ask:"When does the shop reopen?",options:["July 15 at 9 am","July 14 at 9 am","July 15 at 8 am","July 16 at 9 am"],answer:"July 15 at 9 am"},
+{id:"a2r6",aspect:"reading",format:"mcq",instr:"Read this email.",ctx:"Bonjour, je confirme notre rendez-vous de jeudi à 14 h. Si vous ne pouvez pas, merci de me prévenir avant mercredi soir.",ask:"What should you do if you can't come?",options:["Tell them before Wednesday evening","Come anyway","Call on Thursday morning","Nothing at all"],answer:"Tell them before Wednesday evening"},
+{id:"a2r7",aspect:"reading",format:"mcq",instr:"Read the short dialogue.",ctx:"— Comment tu es venu ?\n— En métro. La voiture est chez le garagiste.",ask:"Why didn't he drive?",options:["His car is being repaired","He has no licence","He prefers the metro","The car is too small"],answer:"His car is being repaired"},
+{id:"a2r8",aspect:"reading",format:"mcq",instr:"Read this recipe step.",ctx:"Faites cuire les pâtes 8 minutes, puis ajoutez la sauce.",ask:"What do you do after cooking the pasta?",options:["Add the sauce","Cook it 8 more minutes","Rinse the pasta","Serve it cold"],answer:"Add the sauce"},
+{id:"a2r9",aspect:"reading",format:"mcq",instr:"Read the short dialogue.",ctx:"— Tu viens à la fête samedi ?\n— J'aimerais bien, mais je travaille dimanche matin très tôt.",ask:"What does the second person mean?",options:["He probably won't come","He will definitely come","He was not invited","The party is on Sunday"],answer:"He probably won't come"},
+{id:"a2r10",aspect:"reading",format:"mcq",instr:"Read this small ad.",ctx:"Vends vélo, bon état, peu utilisé, 80 €. Contact après 18 h.",ask:"When should you make contact?",options:["After 6 pm","Before 6 pm","At 8 am","Any time"],answer:"After 6 pm"},
+
+{id:"a2u1",aspect:"usage",format:"mcq",instr:"A colleague invites you out, but you can't go. What is the polite answer?",options:["Désolé, je ne peux pas, mais merci !","Oui, super, à quelle heure on se retrouve ?","C'est gentil, je viens avec grand plaisir !","Non, ce soir-là je fais autre chose."],answer:"Désolé, je ne peux pas, mais merci !"},
+{id:"a2u2",aspect:"usage",format:"mcq",instr:"You call a company. How do you start?",options:["Bonjour, je vous appelle au sujet de…","Allô, c'est qui à l'appareil ?","Bonjour, tu peux me passer le directeur ?","Je rappellerai plus tard, tant pis."],answer:"Bonjour, je vous appelle au sujet de…"},
+{id:"a2u3",aspect:"usage",format:"mcq",instr:"You didn't understand what someone said. What do you say?",options:["Vous pouvez répéter, s'il vous plaît ?","Vous pouvez continuer, je vous en prie.","Je vous écoute, allez-y, pas de souci.","Vous avez raison, c'est très clair."],answer:"Vous pouvez répéter, s'il vous plaît ?"},
+{id:"a2u4",aspect:"usage",format:"mcq",instr:"How do you end a formal email?",options:["Cordialement","Amicalement","Affectueusement","À la prochaine"],answer:"Cordialement"},
+{id:"a2u5",aspect:"usage",format:"mcq",instr:"You want to suggest an activity to a friend. Which sentence is a suggestion?",options:["On pourrait aller au cinéma ?","Tu dois absolument aller au cinéma.","On est allés au cinéma ensemble.","Il faut que tu ailles au cinéma."],answer:"On pourrait aller au cinéma ?"},
+{id:"a2u6",aspect:"usage",format:"mcq",instr:"You arrive ten minutes late for a lesson. What do you say?",options:["Désolé pour le retard !","Enfin, vous voilà tous !","Vous êtes en avance, non ?","Merci d'être venus si vite."],answer:"Désolé pour le retard !"},
+{id:"a2u7",aspect:"usage",format:"mcq",instr:"You are at the cash desk and want to use your card. What do you ask?",options:["Je peux payer par carte ?","Vous pouvez me faire un prix ?","Je peux avoir la monnaie ?","Vous fermez à quelle heure ?"],answer:"Je peux payer par carte ?"},
+{id:"a2u8",aspect:"usage",format:"mcq",instr:"A friend tells you bad news. What do you answer?",options:["Oh non, je suis désolé pour toi.","Tant mieux, je suis content pour toi.","Bof, ce n'est pas grave, on verra bien.","Félicitations, tu le mérites vraiment !"],answer:"Oh non, je suis désolé pour toi."},
+{id:"a2u9",aspect:"usage",format:"mcq",instr:"You ask a stranger in the street for directions. Which sentence is appropriate?",options:["Excusez-moi, je cherche la gare.","Excuse-moi, tu sais où est la gare ?","Dites donc, elle est où, cette gare ?","Je vais à la gare, et vous alors ?"],answer:"Excusez-moi, je cherche la gare."},
+{id:"a2u10",aspect:"usage",format:"mcq",instr:"Which sentence asks for permission?",options:["Est-ce que je peux ouvrir la fenêtre ?","Est-ce que tu ouvres la fenêtre ?","Il faut ouvrir la fenêtre tout de suite.","Quelqu'un a encore ouvert la fenêtre ?"],answer:"Est-ce que je peux ouvrir la fenêtre ?"},
+
+{id:"a2s1",aspect:"structure",format:"order",instr:"Put the words in the correct order.",tokens:["Je","n'ai","pas","encore","mangé"],answers:["Je n'ai pas encore mangé"]},
+{id:"a2s2",aspect:"structure",format:"order",instr:"Put the words in the correct order to make a question.",tokens:["Est-ce que","tu","peux","m'aider"],answers:["Est-ce que tu peux m'aider"]},
+{id:"a2s3",aspect:"structure",format:"mcq",instr:"What is the subject of this sentence?",stem:"Hier, mes parents ont visité un musée.",options:["mes parents","Hier","ont visité","un musée"],answer:"mes parents"},
+{id:"a2s4",aspect:"structure",format:"mcq",instr:"In this sentence, what does « lui » replace?",stem:"Elle lui a donné un cadeau.",options:["A person","An object","A place","A moment in time"],answer:"A person"},
+{id:"a2s5",aspect:"structure",format:"order",instr:"Put the words in the correct order.",tokens:["Nous","sommes","partis","très","tôt"],answers:["Nous sommes partis très tôt"]},
+{id:"a2s6",aspect:"structure",format:"order",instr:"Put the words in the correct order.",tokens:["Elle","m'a","appelé","ce","matin"],answers:["Elle m'a appelé ce matin"]},
+{id:"a2s7",aspect:"structure",format:"mcq",instr:"What is the direct object of this sentence?",stem:"Marc a acheté une nouvelle voiture.",options:["une nouvelle voiture","Marc","a acheté","nouvelle"],answer:"une nouvelle voiture"},
+{id:"a2s8",aspect:"structure",format:"order",instr:"Put the words in the correct order.",tokens:["Nous","allons","déménager","le","mois","prochain"],answers:["Nous allons déménager le mois prochain"]},
+{id:"a2s9",aspect:"structure",format:"mcq",instr:"In this answer, what does « y » replace?",ctx:"— Tu vas à Paris ?\n— Oui, j'y vais demain.",options:["A place","A person","An object","A moment in time"],answer:"A place"},
+{id:"a2s10",aspect:"structure",format:"order",instr:"Put the words in the correct order.",tokens:["Je","me","lève","à","sept","heures"],answers:["Je me lève à sept heures"]}
+],
+
+B1: [
+{id:"b1v1",aspect:"vocab",format:"mcq",instr:"What does « un enjeu » mean here?",stem:"L'éducation est un enjeu majeur pour le pays.",options:["A key issue at stake","A rule","A game","A joke"],answer:"A key issue at stake"},
+{id:"b1v2",aspect:"vocab",format:"type",instr:"Write the noun that comes from the verb « améliorer ».",stem:"améliorer → l'___",accept:["amélioration","l'amélioration","amelioration"]},
+{id:"b1v3",aspect:"vocab",format:"mcq",instr:"What does « ça vaut le coup » mean?",options:["It's worth it","It hurts","It's forbidden","It's expensive"],answer:"It's worth it"},
+{id:"b1v4",aspect:"vocab",format:"mcq",instr:"Choose the best connector.",stem:"Il pleuvait, ___ nous sommes sortis quand même.",options:["pourtant","donc","parce que","grâce à"],answer:"pourtant"},
+{id:"b1v5",aspect:"vocab",format:"type",instr:"Complete the expression.",stem:"Je n'ai pas eu le temps : j'étais débordé de ___.",accept:["travail","boulot"]},
+{id:"b1v6",aspect:"vocab",format:"mcq",instr:"What does « d'ailleurs » do in this sentence?",stem:"Il est très compétent ; d'ailleurs, tout le monde le dit.",options:["It adds a supporting remark","It contradicts","It sets a condition","It expresses a doubt"],answer:"It adds a supporting remark"},
+{id:"b1v7",aspect:"vocab",format:"type",instr:"Write the noun that comes from the verb « développer ».",stem:"développer → le ___",accept:["développement","le développement","developpement"]},
+{id:"b1v8",aspect:"vocab",format:"mcq",instr:"What does « faire la sourde oreille » mean?",options:["To pretend not to hear","To listen carefully","To speak very loudly","To lose your hearing"],answer:"To pretend not to hear"},
+{id:"b1v9",aspect:"vocab",format:"mcq",instr:"Choose the best connector.",stem:"Il n'avait presque pas révisé ; ___, il a réussi l'examen.",options:["néanmoins","car","puisque","ainsi"],answer:"néanmoins"},
+{id:"b1v10",aspect:"vocab",format:"type",instr:"Write the missing preposition.",stem:"Je compte ___ toi pour organiser la réunion.",accept:["sur"]},
+
+{id:"b1g1",aspect:"grammar",format:"mcq",instr:"Choose the correct form.",stem:"Il faut que tu ___ plus tôt demain.",options:["partes","pars","partiras","partais"],answer:"partes"},
+{id:"b1g2",aspect:"grammar",format:"mcq",instr:"Choose the correct relative pronoun.",stem:"C'est le livre ___ je t'ai parlé.",options:["dont","que","qui","où"],answer:"dont"},
+{id:"b1g3",aspect:"grammar",format:"type",instr:"Put the verb in the imparfait.",stem:"Avant, il ___ (habiter) à Lyon.",accept:["habitait","il habitait"]},
+{id:"b1g4",aspect:"grammar",format:"mcq",instr:"Choose the correct form.",stem:"Si j'avais plus de temps, je ___ le piano.",options:["apprendrais","apprendrai","apprends","apprenne"],answer:"apprendrais"},
+{id:"b1g5",aspect:"grammar",format:"mcq",instr:"Choose the correct past tense combination.",stem:"Je lisais quand le téléphone ___.",options:["a sonné","sonnait","sonnera","sonne"],answer:"a sonné"},
+{id:"b1g6",aspect:"grammar",format:"mcq",instr:"Choose the correct form.",stem:"Il est important que nous ___ à l'heure.",options:["soyons","sommes","serons","étions"],answer:"soyons"},
+{id:"b1g7",aspect:"grammar",format:"mcq",instr:"Choose the correct relative pronoun.",stem:"C'est la ville ___ je suis né.",options:["où","que","dont","qui"],answer:"où"},
+{id:"b1g8",aspect:"grammar",format:"type",instr:"Put the verb in the conditionnel.",stem:"J'___ (aimer) travailler à l'étranger.",accept:["aimerais","j'aimerais"]},
+{id:"b1g9",aspect:"grammar",format:"mcq",instr:"Choose the best link word.",stem:"Elle a beaucoup travaillé ; ___ elle est épuisée.",options:["c'est pourquoi","malgré","bien que","sans que"],answer:"c'est pourquoi"},
+{id:"b1g10",aspect:"grammar",format:"mcq",instr:"Choose the correct pronoun.",ctx:"— Tu as parlé à Marie ?\n— Oui, je ___ ai parlé hier.",options:["lui","l'","la","y"],answer:"lui"},
+
+{id:"b1r1",aspect:"reading",format:"mcq",instr:"Read this message.",ctx:"Je vous écris pour vous informer que je ne pourrai pas assister à la réunion de mardi. Pourriez-vous m'envoyer le compte rendu ?",ask:"What does the person ask for?",options:["The minutes of the meeting","A new meeting date","A phone call","A day off"],answer:"The minutes of the meeting"},
+{id:"b1r2",aspect:"reading",format:"mcq",instr:"Read this opinion.",ctx:"Le film était magnifique visuellement, mais l'histoire manquait vraiment de profondeur.",ask:"What is the opinion?",options:["Beautiful images, weak story","Great story, ugly images","Perfect in every way","Boring images and story"],answer:"Beautiful images, weak story"},
+{id:"b1r3",aspect:"reading",format:"mcq",instr:"Read the short dialogue.",ctx:"— Tu devrais lui en parler.\n— Oui, je sais… mais je préfère attendre le bon moment.",ask:"What is the second person doing?",options:["Delaying a difficult conversation","Refusing to speak forever","Asking for permission","Changing the subject completely"],answer:"Delaying a difficult conversation"},
+{id:"b1r4",aspect:"reading",format:"mcq",instr:"Read this notice.",ctx:"En raison de travaux, la ligne 2 sera interrompue entre Nation et République du 3 au 12 mars. Un service de bus sera mis en place.",ask:"What is the solution offered?",options:["A replacement bus service","A less frequent but maintained metro service","A free shuttle, but only at rush hour","A detour via another metro line"],answer:"A replacement bus service"},
+{id:"b1r5",aspect:"reading",format:"mcq",instr:"Read this short text carefully.",ctx:"Apprendre une langue demande de la régularité : mieux vaut vingt minutes par jour que trois heures le dimanche.",ask:"According to the text, what is NOT a good idea?",options:["Studying three hours in a row on Sunday","Practising twenty minutes every day","Being regular in your practice","Short but frequent study sessions"],answer:"Studying three hours in a row on Sunday"},
+{id:"b1r6",aspect:"reading",format:"mcq",instr:"Read this museum notice carefully.",ctx:"L'entrée est gratuite pour les moins de 18 ans et pour tous le premier dimanche du mois.",ask:"Who does NOT get in for free?",options:["A 25-year-old, on an ordinary Saturday","A 16-year-old, on an ordinary Saturday","A 40-year-old, the first Sunday of the month","A 17-year-old, the first Sunday of the month"],answer:"A 25-year-old, on an ordinary Saturday"},
+{id:"b1r7",aspect:"reading",format:"mcq",instr:"Read this sentence.",ctx:"Bien qu'il ait beaucoup plu cet été, la récolte a été bonne.",ask:"What is the relationship between the two facts?",options:["Good harvest despite the rain","Good harvest thanks to the rain","Bad harvest because of the rain","There was no harvest"],answer:"Good harvest despite the rain"},
+{id:"b1r8",aspect:"reading",format:"mcq",instr:"Read this notification.",ctx:"Nous vous informons que votre commande a été expédiée et devrait vous parvenir sous 48 heures.",ask:"What is the situation?",options:["The order has been shipped","The order is cancelled","The order is still being prepared","The order is lost"],answer:"The order has been shipped"},
+{id:"b1r9",aspect:"reading",format:"mcq",instr:"Read the short dialogue.",ctx:"— Alors, ce nouveau travail ?\n— Franchement, je ne m'attendais pas à autant de pression.",ask:"How does the person feel?",options:["Surprised by how much pressure there is","Relieved there is less pressure than expected","Disappointed that the job is not interesting","Annoyed by colleagues who are too distant"],answer:"Surprised by how much pressure there is"},
+{id:"b1r10",aspect:"reading",format:"mcq",instr:"Read this sentence.",ctx:"À force de répéter les mêmes erreurs, il a fini par perdre la confiance de son équipe.",ask:"Why did he lose their trust?",options:["He kept repeating the same mistakes","He worked too much","He left the team","He was too confident"],answer:"He kept repeating the same mistakes"},
+
+{id:"b1u1",aspect:"usage",format:"mcq",instr:"You disagree politely in a discussion. Which sentence fits best?",options:["Je comprends, mais je ne suis pas tout à fait d'accord.","Je suis entièrement d'accord avec vous sur ce point.","Vous vous trompez, mais ce n'est pas bien grave.","On n'a qu'à dire que tout le monde a raison."],answer:"Je comprends, mais je ne suis pas tout à fait d'accord."},
+{id:"b1u2",aspect:"usage",format:"mcq",instr:"Which sentence gives an opinion with a nuance?",options:["J'ai l'impression que ça dépend du contexte.","Je suis sûr et certain d'avoir entièrement raison.","C'est exactement ce que tout le monde pense.","Chacun ses goûts, moi je n'ai pas d'avis."],answer:"J'ai l'impression que ça dépend du contexte."},
+{id:"b1u3",aspect:"usage",format:"mcq",instr:"You ask your boss for a day off. Which register is right?",options:["Serait-il possible de prendre ma journée vendredi ?","Je voudrais que je prenne ma journée vendredi.","Ça vous embête si je prends pas vendredi ?","Vous devez me donner ma journée de vendredi."],answer:"Serait-il possible de prendre ma journée vendredi ?"},
+{id:"b1u4",aspect:"usage",format:"mcq",instr:"What does « je suis passé à côté » suggest here?",stem:"L'examen ? Je crois que je suis passé complètement à côté.",options:["I completely missed the point","I walked past the room","I passed easily","I arrived late"],answer:"I completely missed the point"},
+{id:"b1u5",aspect:"usage",format:"mcq",instr:"Which sentence is the most natural way to soften bad news at work?",options:["Je crains que ce ne soit pas possible cette semaine.","Je confirme que c'est tout à fait possible cette semaine.","Il paraît que personne ne veut le faire cette semaine.","Je vous préviens que ça ne sert à rien d'insister."],answer:"Je crains que ce ne soit pas possible cette semaine."},
+{id:"b1u6",aspect:"usage",format:"mcq",instr:"You want to interrupt politely in a meeting. What do you say?",options:["Je peux juste ajouter quelque chose ?","Laissez-moi enfin parler un peu, non ?","On peut passer au point suivant ?","Vous avez bientôt fini de parler ?"],answer:"Je peux juste ajouter quelque chose ?"},
+{id:"b1u7",aspect:"usage",format:"mcq",instr:"How do you open a formal email to someone whose name you do NOT know?",options:["Madame, Monsieur,","Chère Madame Dupont,","À qui de droit,","Bonjour à toutes et à tous,"],answer:"Madame, Monsieur,"},
+{id:"b1u8",aspect:"usage",format:"mcq",instr:"What does « ça ne me dérange pas » mean?",options:["I don't mind","I refuse","I don't understand","I am annoyed"],answer:"I don't mind"},
+{id:"b1u9",aspect:"usage",format:"mcq",instr:"Which sentence expresses a regret about the past?",options:["J'aurais dû partir plus tôt.","Je vais partir plus tôt.","Je pars plus tôt.","Je partirai plus tôt."],answer:"J'aurais dû partir plus tôt."},
+{id:"b1u10",aspect:"usage",format:"mcq",instr:"A colleague thanks you for real help. Which answer sounds most natural?",options:["Je t'en prie, c'était normal.","Merci beaucoup, c'est trop gentil.","Oui, j'ai fait du très bon travail.","De rien, mais tu me dois un service."],answer:"Je t'en prie, c'était normal."},
+
+{id:"b1s1",aspect:"structure",format:"order",instr:"Put the words in the correct order.",tokens:["Bien que","ce","soit","difficile","je","continue"],answers:["Bien que ce soit difficile je continue"]},
+{id:"b1s2",aspect:"structure",format:"mcq",instr:"In this sentence, what is the function of « qui »?",stem:"La personne qui m'a aidé est ma voisine.",options:["Subject of the relative clause","Direct object","An indication of place","A possessive"],answer:"Subject of the relative clause"},
+{id:"b1s3",aspect:"structure",format:"order",instr:"Put the words in the correct order.",tokens:["Je","lui","ai","dit","la","vérité"],answers:["Je lui ai dit la vérité"]},
+{id:"b1s4",aspect:"structure",format:"mcq",instr:"What does this sentence structure express?",stem:"Si tu avais révisé, tu aurais réussi.",options:["An unreal condition in the past","A future plan","A habit","An order"],answer:"An unreal condition in the past"},
+{id:"b1s5",aspect:"structure",format:"order",instr:"Put the words in the correct order.",tokens:["C'est","la","raison","pour","laquelle","j'hésite"],answers:["C'est la raison pour laquelle j'hésite"]},
+{id:"b1s6",aspect:"structure",format:"order",instr:"Put the words in the correct order.",tokens:["Si","j'avais","su","je","serais","venu"],answers:["Si j'avais su je serais venu"]},
+{id:"b1s7",aspect:"structure",format:"mcq",instr:"What does this structure express?",stem:"Il travaille beaucoup pour que ses enfants aient une belle vie.",options:["A purpose","A cause","A consequence","A comparison"],answer:"A purpose"},
+{id:"b1s8",aspect:"structure",format:"order",instr:"Put the words in the correct order.",tokens:["Ce","dont","j'ai","besoin","c'est","de","temps"],answers:["Ce dont j'ai besoin c'est de temps"]},
+{id:"b1s9",aspect:"structure",format:"mcq",instr:"In this answer, what does « en » replace?",ctx:"— Tu as des idées ?\n— Oui, j'en ai plein !",options:["A quantity of something","A person","A place","A moment in time"],answer:"A quantity of something"},
+{id:"b1s10",aspect:"structure",format:"order",instr:"Put the words in the correct order.",tokens:["Plus","je","pratique","plus","je","progresse"],answers:["Plus je pratique plus je progresse"]}
+],
+
+B2: [
+{id:"b2v1",aspect:"vocab",format:"mcq",instr:"What does « un enjeu de taille » suggest?",stem:"La transition énergétique représente un enjeu de taille.",options:["A considerable challenge","A small detail","A financial loss","A legal obligation"],answer:"A considerable challenge"},
+{id:"b2v2",aspect:"vocab",format:"type",instr:"Write the noun that comes from the verb « échouer ».",stem:"échouer → l'___",accept:["échec","l'échec","echec"]},
+{id:"b2v3",aspect:"vocab",format:"mcq",instr:"What does the writer mean?",stem:"Sous prétexte de simplifier la procédure, on l'a rendue illisible.",options:["The stated reason was not the real one","The procedure is now clearer","The procedure was cancelled","Everyone agreed with the change"],answer:"The stated reason was not the real one"},
+{id:"b2v4",aspect:"vocab",format:"mcq",instr:"Choose the expression with the right nuance.",stem:"Le résultat est correct, ___ il manque d'ambition.",options:["cela étant dit","grâce à quoi","par conséquent","dès lors"],answer:"cela étant dit"},
+{id:"b2v5",aspect:"vocab",format:"type",instr:"Complete the sentence with a suitable noun.",stem:"Il a pris ses responsabilités : il a assumé les conséquences de ses ___.",accept:["actes","choix","actions","décisions"]},
+{id:"b2v6",aspect:"vocab",format:"mcq",instr:"What does « un bilan » mean here?",stem:"Le bilan de l'année est plutôt positif.",options:["An overall assessment","A bill to pay","A meeting","A mistake"],answer:"An overall assessment"},
+{id:"b2v7",aspect:"vocab",format:"type",instr:"Write the noun that comes from the verb « accroître ».",stem:"accroître → l'___",accept:["accroissement","l'accroissement"]},
+{id:"b2v8",aspect:"vocab",format:"mcq",instr:"What does « mettre les bouchées doubles » mean?",options:["To work twice as hard","To eat too much","To slow down","To repeat something twice"],answer:"To work twice as hard"},
+{id:"b2v9",aspect:"vocab",format:"mcq",instr:"Choose the correct expression.",stem:"___ des difficultés, l'équipe a tenu ses délais.",options:["En dépit","Grâce","À cause","Au lieu"],answer:"En dépit"},
+{id:"b2v10",aspect:"vocab",format:"type",instr:"Complete the idiom.",stem:"Cette décision a fait couler beaucoup d'___.",accept:["encre","d'encre"]},
+
+{id:"b2g1",aspect:"grammar",format:"mcq",instr:"Choose the correct form.",stem:"Quoi qu'il ___, nous maintiendrons notre position.",options:["advienne","advient","adviendra","advenait"],answer:"advienne"},
+{id:"b2g2",aspect:"grammar",format:"type",instr:"Put the verb in the plus-que-parfait.",stem:"Quand je suis arrivé, elle ___ (partir) depuis une heure.",accept:["était partie","elle était partie","etait partie"]},
+{id:"b2g3",aspect:"grammar",format:"mcq",instr:"Choose the correct passive form.",stem:"Le rapport ___ par la direction la semaine dernière.",options:["a été validé","est valider","a validé","s'est validant"],answer:"a été validé"},
+{id:"b2g4",aspect:"grammar",format:"mcq",instr:"Choose the correct form.",stem:"À supposer qu'il ___ raison, cela ne change rien.",options:["ait","a","aura","avait"],answer:"ait"},
+{id:"b2g5",aspect:"grammar",format:"mcq",instr:"Which sentence is grammatically correct?",options:["Aussi surprenant que cela puisse paraître, il a accepté.","Aussi surprenant que cela peut paraître, il a accepté.","Aussi surprenant qu'il paraît, il a accepté.","Aussi surprenant que ça paraître, il a accepté."],answer:"Aussi surprenant que cela puisse paraître, il a accepté."},
+{id:"b2g6",aspect:"grammar",format:"mcq",instr:"Choose the correct form.",stem:"Je doute qu'il ___ toute la vérité.",options:["dise","dit","dira","disait"],answer:"dise"},
+{id:"b2g7",aspect:"grammar",format:"mcq",instr:"Complete this fixed expression.",stem:"___ que je sache, le projet est maintenu.",options:["Pour autant","Bien","Afin","Aussi"],answer:"Pour autant"},
+{id:"b2g8",aspect:"grammar",format:"type",instr:"Put the verb in the passé du subjonctif.",stem:"Je regrette qu'il ___ (partir) si vite.",accept:["soit parti","il soit parti"]},
+{id:"b2g9",aspect:"grammar",format:"mcq",instr:"Choose the correct form.",stem:"Il parle comme s'il ___ tout compris.",options:["avait","a","aura","ait"],answer:"avait"},
+{id:"b2g10",aspect:"grammar",format:"mcq",instr:"Choose the correct agreement.",stem:"Les décisions qu'il a ___ étaient courageuses.",options:["prises","pris","prise","prendre"],answer:"prises"},
+
+{id:"b2r1",aspect:"reading",format:"mcq",instr:"Read this extract.",ctx:"Certes, les chiffres progressent. Il n'en reste pas moins que la situation demeure fragile.",ask:"What is the author's position?",options:["Progress is real, but the situation is still fragile","The situation is fragile because the figures are falling","The author doubts the figures are really improving","The fragility is behind us, even if progress is slow"],answer:"Progress is real, but the situation is still fragile"},
+{id:"b2r2",aspect:"reading",format:"mcq",instr:"Read this extract.",ctx:"L'auteur, non sans ironie, qualifie cette réforme de « révolution ».",ask:"What does the author think of the reform?",options:["He is not convinced it is truly revolutionary","He sincerely believes it is a real revolution","He thinks it goes too far to be called a reform","He regrets that the reform was never applied"],answer:"He is not convinced it is truly revolutionary"},
+{id:"b2r3",aspect:"reading",format:"mcq",instr:"Read this extract.",ctx:"Loin de résoudre le problème, cette mesure risque de l'aggraver.",ask:"What is being said about the measure?",options:["It could make the problem worse","It solves part of the problem, but not all of it","It has already made the situation worse","It was designed to make the problem worse"],answer:"It could make the problem worse"},
+{id:"b2r4",aspect:"reading",format:"mcq",instr:"Read this extract.",ctx:"Il aura fallu dix ans pour que ce projet voie enfin le jour.",ask:"What does this sentence say?",options:["The project finally happened, after ten years","The project will need ten more years to happen","After ten years, the project was finally abandoned","The project happened earlier than planned"],answer:"The project finally happened, after ten years"},
+{id:"b2r5",aspect:"reading",format:"mcq",instr:"Read this extract.",ctx:"Quand bien même les moyens seraient réunis, le calendrier resterait intenable.",ask:"What does the author mean?",options:["Even with the resources, the schedule would not hold","The schedule fails only because resources are missing","Once the resources arrive, the schedule will hold","The schedule held, thanks to the extra resources"],answer:"Even with the resources, the schedule would not hold"},
+{id:"b2r6",aspect:"reading",format:"mcq",instr:"Read this extract.",ctx:"Cette hypothèse, pour séduisante qu'elle soit, ne résiste pas à l'analyse.",ask:"What does the writer think?",options:["It is attractive, but it does not hold up","It holds up precisely because it is attractive","It is neither attractive nor worth analysing","It has not yet been seriously analysed"],answer:"It is attractive, but it does not hold up"},
+{id:"b2r7",aspect:"reading",format:"mcq",instr:"Read this extract carefully.",ctx:"Il n'aura échappé à personne que les chiffres ont été soigneusement choisis.",ask:"What is implied?",options:["Everyone can see the figures were carefully picked","Nobody noticed how the figures were chosen","The figures were chosen without any real care","The author admits choosing the figures himself"],answer:"Everyone can see the figures were carefully picked"},
+{id:"b2r8",aspect:"reading",format:"mcq",instr:"Read this extract.",ctx:"Faute de moyens, le projet a été revu à la baisse.",ask:"What happened?",options:["It was scaled down for lack of resources","It was expanded thanks to new resources","It was delayed, but its budget stayed the same","It lost its resources after being scaled down"],answer:"It was scaled down for lack of resources"},
+{id:"b2r9",aspect:"reading",format:"mcq",instr:"Read this extract.",ctx:"Les résultats sont en deçà des attentes, et de loin.",ask:"What does this mean?",options:["The results are well below expectations","The results are only slightly below expectations","The results are well above expectations","Expectations were far too low from the start"],answer:"The results are well below expectations"},
+{id:"b2r10",aspect:"reading",format:"mcq",instr:"Read this extract.",ctx:"Si tant est que l'on puisse parler de réussite, celle-ci reste bien fragile.",ask:"What is the writer's attitude?",options:["Doubtful that it can even be called a success","Convinced it is a fragile but real success","Certain that it is an outright failure","Confident the success will soon get stronger"],answer:"Doubtful that it can even be called a success"},
+
+{id:"b2u1",aspect:"usage",format:"mcq",instr:"In a professional email, which formulation is the most diplomatic?",options:["Je me permets de revenir vers vous à ce sujet.","Je vous rappelle que j'attends toujours votre réponse.","Auriez-vous l'amabilité de répondre enfin à mon message ?","Je me permets d'exiger une réponse rapide de votre part."],answer:"Je me permets de revenir vers vous à ce sujet."},
+{id:"b2u2",aspect:"usage",format:"mcq",instr:"Which sentence belongs to spoken, informal French?",options:["Bref, on a laissé tomber.","En conséquence, le projet a été abandonné.","Il convient de renoncer au projet.","Le projet fut abandonné."],answer:"Bref, on a laissé tomber."},
+{id:"b2u3",aspect:"usage",format:"mcq",instr:"You want to express a strong reservation without being rude. Which one?",options:["Je reste assez réservé sur ce point.","Franchement, je n'y crois pas une seconde.","Ce point ne mérite pas qu'on s'y attarde.","Je partage entièrement votre enthousiasme."],answer:"Je reste assez réservé sur ce point."},
+{id:"b2u4",aspect:"usage",format:"mcq",instr:"What does « ça ne mange pas de pain » mean?",options:["It costs nothing to try","It is very expensive","It is forbidden","It is delicious"],answer:"It costs nothing to try"},
+{id:"b2u5",aspect:"usage",format:"mcq",instr:"Which sentence concedes a point before objecting?",options:["Je vous rejoins sur ce point, cela étant…","Je vous arrête tout de suite, c'est inexact.","C'est un point de détail, passons à l'essentiel.","Vous soulevez une question, j'y répondrai plus tard."],answer:"Je vous rejoins sur ce point, cela étant…"},
+{id:"b2u6",aspect:"usage",format:"mcq",instr:"In a debate, you reformulate the other person's point before answering. Which one?",options:["Si je vous suis bien, vous dites que…","Comme je le disais avant d'être interrompu…","Là n'est pas la question, revenons au sujet.","Chacun aura compris ce que vous vouliez dire."],answer:"Si je vous suis bien, vous dites que…"},
+{id:"b2u7",aspect:"usage",format:"mcq",instr:"Which is the most diplomatic refusal at work?",options:["Je crains de ne pas pouvoir m'engager sur ce délai.","Je vous confirme que ce délai ne me concerne pas.","Ce délai me semble parfaitement réalisable.","Il est hors de question que je m'engage là-dessus."],answer:"Je crains de ne pas pouvoir m'engager sur ce délai."},
+{id:"b2u8",aspect:"usage",format:"mcq",instr:"What does « ne pas y aller de main morte » mean?",options:["To act very forcefully","To be extremely gentle","To arrive late","To give up quickly"],answer:"To act very forcefully"},
+{id:"b2u9",aspect:"usage",format:"mcq",instr:"Which sentence expresses a cautious hypothesis?",options:["Il se pourrait bien que la situation évolue.","La situation évolue.","La situation a évolué.","La situation n'évolue pas."],answer:"Il se pourrait bien que la situation évolue."},
+{id:"b2u10",aspect:"usage",format:"mcq",instr:"Which formulation would NOT be acceptable in a formal written report?",options:["Il faut bien avouer qu'on a eu chaud.","Il convient de rappeler les faits.","Force est de constater que les résultats progressent.","Il importe de souligner ce point."],answer:"Il faut bien avouer qu'on a eu chaud."},
+
+{id:"b2s1",aspect:"structure",format:"order",instr:"Put the words in the correct order.",tokens:["Non","seulement","il","a","accepté","mais","il","a","insisté"],answers:["Non seulement il a accepté mais il a insisté"]},
+{id:"b2s2",aspect:"structure",format:"mcq",instr:"What does this sentence structure express?",stem:"À peine était-il arrivé qu'on lui annonça la nouvelle.",options:["Immediate succession of two events","A condition","A comparison","A repeated habit"],answer:"Immediate succession of two events"},
+{id:"b2s3",aspect:"structure",format:"mcq",instr:"Which sentence is in the passive voice?",options:["La décision a été prise hier.","Il a pris la décision hier.","Il décidera demain.","La décision lui appartient."],answer:"La décision a été prise hier."},
+{id:"b2s4",aspect:"structure",format:"order",instr:"Put the words in the correct order.",tokens:["Quitte","à","me","répéter","j'insiste"],answers:["Quitte à me répéter j'insiste"]},
+{id:"b2s5",aspect:"structure",format:"mcq",instr:"In this sentence, what is « dont » referring to?",stem:"Un projet dont les conséquences restent incertaines.",options:["The project","The consequences","Nothing specific","The author"],answer:"The project"},
+{id:"b2s6",aspect:"structure",format:"order",instr:"Put the words in the correct order.",tokens:["Aussi","surprenant","que","cela","puisse","paraître","c'est","vrai"],answers:["Aussi surprenant que cela puisse paraître c'est vrai"]},
+{id:"b2s7",aspect:"structure",format:"mcq",instr:"What does this structure express?",stem:"N'eût-il pas insisté, rien n'aurait changé.",options:["An unreal condition in the past","A future plan","A simple negation","A polite request"],answer:"An unreal condition in the past"},
+{id:"b2s8",aspect:"structure",format:"order",instr:"Put the words in the correct order (a well-known proverb).",tokens:["C'est","en","forgeant","que","l'on","devient","forgeron"],answers:["C'est en forgeant que l'on devient forgeron"]},
+{id:"b2s9",aspect:"structure",format:"mcq",instr:"What does this sentence add to what was just said?",stem:"Encore faut-il que les moyens suivent.",options:["A restrictive condition (\"but only if…\")","A simple question","A direct order","A comparison"],answer:"A restrictive condition (\"but only if…\")"},
+{id:"b2s10",aspect:"structure",format:"order",instr:"Put the words in the correct order.",tokens:["Non","content","d'avoir","gagné","il","a","battu","le","record"],answers:["Non content d'avoir gagné il a battu le record"]}
+]
+};
+</script>
+<script>
+(function(){
+"use strict";
+/* ---- Links to fill in (leave empty to show a text pointer instead) ---- */
+var CONFIG={consultationUrl:"https://calendar.app.google/LbtdS1yiRzXGRLUc6",kofiUrl:"https://ko-fi.com/s/701ae87edb"};
+
+var LEVELS=["A1","A2","B1","B2"];
+var ICONS=["\uD83C\uDF31","\uD83C\uDF3F","\uD83C\uDF33","\u2B50"];
+var ASPECTS=["vocab","grammar","reading","usage","structure"];
+var ASPECT_LABEL={vocab:"Vocabulary",grammar:"Grammar",reading:"Reading",usage:"Real-life French",structure:"Sentence structure"};
+var KEY="fv_level_test_seen_v1";
+var DUNNO="\uD83E\uDD37 I don\u2019t know yet";
+
+var screenEl=document.getElementById("screen");
+var trackerEl=document.getElementById("tracker");
+var pathEl=document.getElementById("pathwrap");
+var miniEl=document.getElementById("mini");
+var metaEl=document.getElementById("stagemeta");
+
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function norm(s){return (s==null?"":String(s)).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[\u2019\u02bc\u00b4]/g,"'").replace(/[.,!?;:\u00ab\u00bb"\u2026]/g,"").replace(/\s+/g," ").trim()}
+function esc(s){return (s==null?"":String(s)).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function gap(s){return esc(s).replace(/___/g,'<span class="gap">___</span>')}
+function loadSeen(){try{var v=JSON.parse(localStorage.getItem(KEY));return (v&&typeof v==="object")?v:{}}catch(e){return{}}}
+function saveSeen(v){try{localStorage.setItem(KEY,JSON.stringify(v))}catch(e){}}
+
+var S={seen:loadSeen(),start:0,stage:0,qs:[],qi:0,correct:0,unknown:0,dots:[],passed:[],failed:{},done:false,result:null};
+
+function initDots(start){S.dots=[];for(var i=0;i<4;i++){var row=[];for(var j=0;j<10;j++){row.push(i<start?"skip":"todo")}S.dots.push(row)}}
+
+/* ---------- progress path ---------- */
+var P=[[46,166],[286,74],[520,166],[752,74],[958,166]];
+var TENSION=0.2;
+function cps(i){
+  var p0=P[i-1]||P[i],p1=P[i],p2=P[i+1],p3=P[i+2]||P[i+1];
+  return [[p1[0]+(p2[0]-p0[0])*TENSION,p1[1]+(p2[1]-p0[1])*TENSION],
+          [p2[0]-(p3[0]-p1[0])*TENSION,p2[1]-(p3[1]-p1[1])*TENSION]];
+}
+function cpt(i,t){
+  var p1=P[i],p2=P[i+1],c=cps(i),c1=c[0],c2=c[1],u=1-t;
+  return [u*u*u*p1[0]+3*u*u*t*c1[0]+3*u*t*t*c2[0]+t*t*t*p2[0],
+          u*u*u*p1[1]+3*u*u*t*c1[1]+3*u*t*t*c2[1]+t*t*t*p2[1]];
+}
+
+function drawPath(){
+  var s='<svg viewBox="0 0 1000 215" role="img" aria-label="Your progress through the levels">';
+  var i,j;
+  for(i=0;i<4;i++){
+    var c=cps(i),cls="seg";
+    if(S.passed[i])cls+=" done";else if(i===S.stage&&!S.done)cls+=" now";else if(i<S.start&&S.dots[i][0]==="skip")cls+=" skip";
+    s+='<path class="'+cls+'" d="M'+P[i][0]+' '+P[i][1]+' C'+c[0][0].toFixed(1)+' '+c[0][1].toFixed(1)+' '+c[1][0].toFixed(1)+' '+c[1][1].toFixed(1)+' '+P[i+1][0]+' '+P[i+1][1]+'"/>';
+  }
+  s+='<circle class="dot" cx="'+P[0][0]+'" cy="'+P[0][1]+'" r="8"/>';
+  s+='<text class="startlab" x="'+P[0][0]+'" y="'+(P[0][1]+30)+'">Start</text>';
+  for(i=0;i<4;i++){
+    for(j=0;j<10;j++){
+      var pt=cpt(i,(j+1)/11),st=S.dots[i][j],dc="dot";
+      if(st==="done")dc+=" done";else if(st==="skip")dc+=" skip";else if(st==="current")dc+=" cur";
+      if(st==="current"){s+='<circle class="ring" cx="'+pt[0].toFixed(1)+'" cy="'+pt[1].toFixed(1)+'" r="9.4"/>'}
+      s+='<circle class="'+dc+'" cx="'+pt[0].toFixed(1)+'" cy="'+pt[1].toFixed(1)+'" r="5.2"/>';
+    }
+  }
+  for(i=0;i<4;i++){
+    var p=P[i+1],mc="ms",lc="mslab";
+    if(S.passed[i]){mc+=" done";lc+=" done"}else if(i===S.stage&&!S.done){mc+=" now";lc+=" now"}
+    s+='<circle class="'+mc+'" cx="'+p[0]+'" cy="'+p[1]+'" r="19"/>';
+    s+='<text class="msicon" x="'+p[0]+'" y="'+(p[1]+1)+'">'+ICONS[i]+'</text>';
+    s+='<text class="'+lc+'" x="'+p[0]+'" y="'+(p[1]<120?p[1]-29:p[1]+37)+'">'+LEVELS[i]+'</text>';
+  }
+  s+='</svg>';
+  pathEl.innerHTML=s;
+
+  var m="",k;
+  for(k=0;k<4;k++){
+    var c2="mstone"+(S.passed[k]?" done":((k===S.stage&&!S.done)?" now":""));
+    m+='<span class="'+c2+'">'+ICONS[k]+' '+LEVELS[k]+'</span>';
+  }
+  var cur=S.dots[Math.min(S.stage,3)]||[];
+  m+='<span class="mdots">'+cur.map(function(st){return '<span class="mdot'+(st==="done"?" done":(st==="current"?" now":""))+'"></span>'}).join("")+'</span>';
+  miniEl.innerHTML=m;
+}
+function showTracker(){trackerEl.hidden=false;drawPath()}
+
+/* ---------- question selection (no repeats across 5 rounds) ---------- */
+function pickStage(level){
+  if(!Array.isArray(S.seen[level]))S.seen[level]=[];
+  var byA={};
+  BANK[level].forEach(function(q){(byA[q.aspect]=byA[q.aspect]||[]).push(q)});
+  var out=[];
+  ASPECTS.forEach(function(a){
+    var pool=byA[a]||[];if(!pool.length)return;
+    var avail=pool.filter(function(q){return S.seen[level].indexOf(q.id)<0});
+    var take=shuffle(avail).slice(0,2);
+    if(take.length<2){
+      var ids=pool.map(function(q){return q.id});
+      S.seen[level]=S.seen[level].filter(function(id){return ids.indexOf(id)<0});
+      var rest=shuffle(pool.filter(function(q){return take.indexOf(q)<0}));
+      take=take.concat(rest.slice(0,2-take.length));
+    }
+    take.forEach(function(q){S.seen[level].push(q.id);out.push(q)});
+  });
+  saveSeen(S.seen);
+  return shuffle(out);
+}
+
+/* ---------- screens ---------- */
+function intro(){
+  trackerEl.hidden=true;
+  screenEl.innerHTML='<h1>What\u2019s my French level? \uD83E\uDDED</h1>'+
+  '<p class="lead">No sign-up, no email, no score to be ashamed of. The questions adapt to you, so you never have to guess.</p>'+
+  '<ul class="chips"><li class="chip">\u23F1\uFE0F 4\u201310 minutes</li><li class="chip">\uD83E\uDDED 10 to 40 questions</li><li class="chip">\uD83E\uDD37 \u00ab I don\u2019t know \u00bb is always allowed</li><li class="chip">\uD83C\uDD95 New questions every time</li></ul>'+
+  '<p class="ask">First, one question in English. It only tells me where to start, it is not part of your score.</p>'+
+  '<p class="instr">How much French have you studied so far?</p>'+
+  '<div class="opts" id="route"></div>';
+  var routes=[["Never, I\u2019m starting from zero","zero"],["A few weeks","w"],["A few months","m"],["1 to 2 years","y"],["More than 2 years","p"]];
+  var box=document.getElementById("route");
+  routes.forEach(function(r,i){
+    var b=document.createElement("button");
+    b.type="button";b.className="opt";
+    b.innerHTML='<span class="k">'+(i+1)+'</span><span>'+esc(r[0])+'</span>';
+    b.addEventListener("click",function(){route(r[1])});
+    box.appendChild(b);
+  });
+}
+
+function route(code){
+  if(code==="zero"){S.start=0;S.stage=0;initDots(0);S.done=true;S.result="A0";showTracker();metaEl.textContent="Your starting point";result();return}
+  var start=(code==="y")?1:(code==="p")?2:0;
+  S.start=start;S.stage=start;S.passed=[];S.failed={};S.done=false;initDots(start);
+  startStage();
+}
+
+function startStage(){
+  S.qs=pickStage(LEVELS[S.stage]);S.qi=0;S.correct=0;S.unknown=0;
+  for(var j=0;j<10;j++){S.dots[S.stage][j]="todo"}
+  showTracker();renderQ();
+}
+
+function renderQ(){
+  var q=S.qs[S.qi];
+  for(var j=0;j<10;j++){S.dots[S.stage][j]=(j<S.qi)?"done":(j===S.qi?"current":"todo")}
+  showTracker();
+  metaEl.textContent="Stage "+(S.stage+1)+" of 4 \u00b7 "+LEVELS[S.stage]+" level \u00b7 Question "+(S.qi+1)+" of 10";
+  var h='<p class="qmeta">'+esc(ASPECT_LABEL[q.aspect]||"")+'</p>';
+  h+='<p class="instr">'+esc(q.instr)+'</p>';
+  if(q.ctx)h+='<div class="ctx">'+esc(q.ctx)+'</div>';
+  if(q.stem)h+='<p class="stem">'+gap(q.stem)+'</p>';
+  if(q.ask)h+='<p class="ask">'+esc(q.ask)+'</p>';
+  if(q.format==="mcq"){
+    h+='<div class="opts" id="opts"></div><button type="button" class="dunno" id="dunno">'+DUNNO+'</button>';
+    screenEl.innerHTML=h;
+    var box=document.getElementById("opts");
+    shuffle(q.options).forEach(function(o,i){
+      var b=document.createElement("button");b.type="button";b.className="opt";
+      b.innerHTML='<span class="k">'+"ABCD".charAt(i)+'</span><span>'+esc(o)+'</span>';
+      b.addEventListener("click",function(){b.classList.add("sel");setTimeout(function(){answer(norm(o)===norm(q.answer),false)},170)});
+      box.appendChild(b);
+    });
+  }else if(q.format==="type"){
+    h+='<label class="instr" for="ti">Your answer</label><input type="text" id="ti" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Type in French\u2026">'+
+      '<div class="row"><button type="button" class="btn" id="go">Continue \u2192</button></div>'+
+      '<p class="hint">\u2728 Accents are optional. <em>ecoute</em> is accepted for <em>\u00e9coute</em>.</p>'+
+      '<button type="button" class="dunno" id="dunno">'+DUNNO+'</button>';
+    screenEl.innerHTML=h;
+    var inp=document.getElementById("ti");
+    var submit=function(){
+      var v=norm(inp.value);
+      if(!v){inp.focus();return}
+      var ok=(q.accept||[]).some(function(a){return norm(a)===v});
+      answer(ok,false);
+    };
+    document.getElementById("go").addEventListener("click",submit);
+    inp.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();submit()}});
+    inp.focus();
+  }else{
+    h+='<div class="build" id="build"><span class="ph">Tap the words in the right order\u2026</span></div>'+
+      '<div class="tokens" id="toks"></div>'+
+      '<div class="row"><button type="button" class="btn" id="go">Continue \u2192</button>'+
+      '<button type="button" class="btn ghost" id="clr">Clear</button></div>'+
+      '<p class="hint" id="omsg">No need to add any punctuation.</p>'+
+      '<button type="button" class="dunno" id="dunno">'+DUNNO+'</button>';
+    screenEl.innerHTML=h;
+    var build=document.getElementById("build"),toks=document.getElementById("toks"),chosen=[];
+    var refresh=function(){
+      if(!chosen.length){build.innerHTML='<span class="ph">Tap the words in the right order\u2026</span>'}
+      else{
+        build.innerHTML="";
+        chosen.forEach(function(c,i){
+          var b=document.createElement("button");b.type="button";b.className="bt";b.textContent=c.word;
+          b.setAttribute("aria-label","Remove "+c.word);
+          b.addEventListener("click",function(){c.el.disabled=false;chosen.splice(i,1);refresh()});
+          build.appendChild(b);
+        });
+      }
+    };
+    shuffle(q.tokens).forEach(function(w){
+      var b=document.createElement("button");b.type="button";b.className="tok";b.textContent=w;
+      b.addEventListener("click",function(){b.disabled=true;chosen.push({word:w,el:b});refresh()});
+      toks.appendChild(b);
+    });
+    document.getElementById("clr").addEventListener("click",function(){
+      chosen.forEach(function(c){c.el.disabled=false});chosen=[];refresh();
+    });
+    document.getElementById("go").addEventListener("click",function(){
+      if(chosen.length<q.tokens.length){document.getElementById("omsg").textContent="\u26A0\uFE0F Place all the words first, then continue.";return}
+      var built=norm(chosen.map(function(c){return c.word}).join(" "));
+      var ok=(q.answers||[]).some(function(a){return norm(a)===built});
+      answer(ok,false);
+    });
+  }
+  document.getElementById("dunno").addEventListener("click",function(){answer(false,true)});
+  if(window.scrollY>0)window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function answer(ok,unknown){
+  if(unknown){S.unknown++}else if(ok){S.correct++}
+  S.dots[S.stage][S.qi]="done";
+  if(S.unknown>=5){return endStage(true)}
+  S.qi++;
+  var left=10-S.qi;
+  if(S.qi>=10){return endStage(false)}
+  if(S.correct>=8){return endStage(false)}
+  if(S.correct+left<6){return endStage(false)}
+  if(S.correct>=6&&S.correct+left<8){return endStage(false)}
+  renderQ();
+}
+
+function finish(code){S.done=true;S.result=code;drawPath();result()}
+
+function endStage(tooManyUnknown){
+  if(!tooManyUnknown&&S.correct>=8){
+    S.passed[S.stage]=true;
+    if(S.stage===3){return finish("B2+")}
+    if(S.failed[S.stage+1]){return finish(LEVELS[S.stage])}
+    drawPath();return celebrate();
+  }
+  if(!tooManyUnknown&&S.correct>=6){return finish(LEVELS[S.stage]+"-")}
+  if(S.stage>0&&S.stage<=S.start){return stepdown()}
+  return finish(S.stage===0?"A0":LEVELS[S.stage-1]);
+}
+
+function stepdown(){
+  S.failed[S.stage]=true;
+  var from=LEVELS[S.stage];
+  S.stage--;
+  drawPath();
+  metaEl.textContent=from+" not confirmed yet";
+  screenEl.innerHTML='<div class="celebrate"><p class="big">\uD83E\uDDED</p>'+
+    '<h1>Let\u2019s check '+LEVELS[S.stage]+'</h1>'+
+    '<p class="lead">'+from+' was a stretch today, and that is completely fine: it tells us exactly where to look. To give you an accurate result, let\u2019s confirm the level below. \u00ab I don\u2019t know \u00bb is still always allowed.</p>'+
+    '<button type="button" class="btn" id="cont">Continue \u2192</button></div>';
+  document.getElementById("cont").addEventListener("click",function(){startStage()});
+}
+
+function celebrate(){
+  metaEl.textContent=LEVELS[S.stage]+" checkpoint reached";
+  screenEl.innerHTML='<div class="celebrate"><p class="big">'+ICONS[S.stage]+'</p>'+
+    '<h1>'+LEVELS[S.stage]+' unlocked!</h1>'+
+    '<p class="lead">That level looks solid. \uD83D\uDC4F The next questions get harder, so answer honestly and use \u00ab I don\u2019t know \u00bb whenever you are unsure. Guessing only gives you a wrong result.</p>'+
+    '<button type="button" class="btn" id="cont">Keep climbing \u2192</button></div>';
+  document.getElementById("cont").addEventListener("click",function(){S.stage++;startStage()});
+}
+
+/* ---------- results ---------- */
+var KOFI='the <strong>complete A0 self-study pack</strong> on Ko-fi';
+function kofi(){return CONFIG.kofiUrl?('the <a class="kofi" href="'+CONFIG.kofiUrl+'" target="_blank" rel="noopener"><strong>complete A0 self-study pack</strong></a> on Ko-fi'):KOFI}
+
+var RESULTS={
+"A0":{badge:"A0 \u00b7 Absolute beginner",title:"You\u2019re right at the start: the best place to make fast progress \uD83C\uDF31",lead:"Building your own sentences is still out of reach, and that is completely normal. The first level is also the one where progress is the most visible: most of my students can introduce themselves in French after three lessons.",work:["The sounds of French and the alphabet, before anything else","Greetings and introducing yourself","The 100 words you will actually use","\u00ab \u00eatre \u00bb and \u00ab avoir \u00bb in the present tense"],next:function(){return["<strong>Beginner Course</strong>: we start from zero, at your pace, 1-on-1.","Prefer to start on your own? "+kofi()+" covers exactly this level."]}},
+"A1-":{badge:"A0+ \u00b7 Almost A1",title:"You have the first bricks. They just aren\u2019t automatic yet \uD83C\uDF31",lead:"You recognised part of the basics, but you still have to think before every sentence. What you need now is repetition and speaking time, not new grammar.",work:["Present tense of the most common verbs","Simple questions: o\u00f9 ? combien ? comment ?","Numbers, prices and telling the time","Pronunciation: the sounds that don\u2019t exist in English"],next:function(){return["<strong>Beginner Course</strong>: we consolidate A1 with the Alter Ego +1 method.","For daily self-practice: "+kofi()+"."]}},
+"A1":{badge:"A1 \u00b7 Survival French",title:"You can survive in French \uD83C\uDF3F",lead:"You can introduce yourself, ask for what you need and understand short, slow sentences. The next step is talking about your life, not just your name.",work:["Pass\u00e9 compos\u00e9: talking about yesterday","Everyday vocabulary: food, transport, work, weather","Longer sentences with parce que, mais, alors","Understanding French at normal speed"],next:function(){return["<strong>Beginner Course</strong> to finish A1 properly, then <strong>Intermediate Levels</strong> (Alter Ego +2)."]}},
+"A2-":{badge:"A1+ \u00b7 Moving into A2",title:"Solid A1, with one foot in A2 \uD83C\uDF3F",lead:"The basics are there and you already understand more than you can produce. Right now the past tenses are probably what slows you down the most.",work:["Pass\u00e9 compos\u00e9 vs imparfait, the big one","Pronouns: le, la, lui, y, en","Telling a short story about your week","Vocabulary for daily life and small talk"],next:function(){return["<strong>Intermediate Levels</strong>: we close the A1 gaps and move into A2 with Alter Ego +2."]}},
+"A2":{badge:"A2 \u00b7 Everyday French",title:"You can talk about your everyday life \uD83C\uDF33",lead:"You handle the past, the near future and everyday situations. Now the goal changes: giving opinions, explaining, and reacting without translating in your head.",work:["Giving and justifying an opinion","Relative pronouns (qui, que, dont) for longer sentences","Subjunctive: the first useful cases","Listening to podcasts made for learners"],next:function(){return["<strong>Intermediate Levels</strong>, then <strong>Exam Prep</strong> if you want to aim for the DELF B1."]}},
+"B1-":{badge:"A2+ \u00b7 Moving into B1",title:"Strong A2. B1 is the next stop \uD83C\uDF33",lead:"You understand a lot and can express yourself in familiar situations. What is missing is precision and confidence with more complex structures.",work:["Subjunctive after il faut que, bien que, pour que","Connectors: pourtant, alors que, en revanche","Structuring an opinion in 3 sentences","Regular listening at native speed"],next:function(){return["<strong>Intermediate Levels</strong>, and it is a good moment to look at <strong>Exam Prep (DELF B1)</strong>."]}},
+"B1":{badge:"B1 \u00b7 Independent user",title:"You can hold a real conversation \uD83C\uDF33",lead:"You can tell a story, give your opinion and deal with unexpected situations. This is exactly the level where a DELF B1 becomes realistic, and where many learners plateau without a plan.",work:["DELF B1 exam strategy: the 4 papers","Nuance: conditional, hypotheses, concession","Idiomatic and spoken French","Native podcasts and series, with method"],next:function(){return["<strong>Exam Prep (DELF / TCF)</strong> if you want the certificate, or <strong>Advanced Course</strong> to keep building fluency."]}},
+"B2-":{badge:"B1+ \u00b7 Moving into B2",title:"Comfortable B1, close to B2 \u2B50",lead:"You handle most situations. The step to B2 is about nuance and register: saying the same thing formally, informally, or ironically, on purpose.",work:["Register: formal writing vs spoken French","Advanced connectors and concession","Complex tenses: plus-que-parfait, past subjunctive","Debating, summarising, argumenting"],next:function(){return["<strong>Advanced Course</strong>, or <strong>Exam Prep</strong> if you need a B2 certificate for work or university."]}},
+"B2+":{badge:"B2+ \u00b7 Confident user",title:"You\u2019re already independent in French \u2B50",lead:"You understood nuance, irony and complex structures, including the questions most learners never reach. A written test can\u2019t go much further: what matters now is how you sound when you speak.",work:["Fluency and spontaneity in real conversation","Idioms, humour and cultural references","Professional French: meetings, emails, presentations","Polishing accent and rhythm"],next:function(){return["<strong>Advanced Course</strong>: conversation-driven, built around your goals."]}}
+};
+
+function ctaBlock(){
+  var btn=CONFIG.consultationUrl
+    ?'<a class="btn" href="'+CONFIG.consultationUrl+'" target="_blank" rel="noopener">Book your free French consultation \u2192</a>'
+    :'<p class="note"><strong>\uD83D\uDC47 Use the \u00ab Book your free French consultation \u00bb button on this page.</strong></p>';
+  return '<div class="cta"><h3>\u2615 Come and meet your teacher, for free</h3>'+
+    '<p>A free 20-minute chat on Google Meet with me, Anthony \uD83D\uDC4B I ask you a few simple questions, in English and in French, and you leave with clear recommendations: what to work on first, which resources suit you, and what a realistic plan looks like.</p>'+
+    '<p>If it feels like a good fit, we can also plan a few 1-on-1 lessons focused on the areas you want to improve. No preparation needed, and no obligation to book.</p>'+btn+'</div>';
+}
+
+function result(){
+  var r=RESULTS[S.result]||RESULTS["A0"];
+  var recap=LEVELS.map(function(l,i){
+    if(S.passed[i])return "\u2705 "+l;
+    if(i<S.start&&S.dots[i][0]==="skip")return "\u2013 "+l;
+    return "\u25FB\uFE0F "+l;
+  }).join("  \u00b7  ");
+  metaEl.textContent="Your result";
+  var h='<span class="badge">'+esc(r.badge)+'</span>'+
+    '<h2 class="rtitle">'+r.title+'</h2>'+
+    '<p class="lead">'+r.lead+'</p>'+
+    '<div class="panel"><h3>What to work on next</h3><ul>'+r.work.map(function(w){return '<li>'+w+'</li>'}).join("")+'</ul></div>'+
+    '<div class="panel"><h3>Where to start on this site</h3><ul>'+r.next().map(function(n){return '<li>'+n+'</li>'}).join("")+'</ul></div>'+
+    ctaBlock()+
+    '<p class="note">Checkpoints: '+recap+'</p>';
+  if(S.start>0&&!S.passed[S.start]){
+    h+='<p class="note">\u2139\uFE0F We started you at '+LEVELS[S.start]+' based on your first answer. That level was not confirmed today, so the test automatically checked the level below: your result only counts questions you actually answered.</p>';
+  }
+  h+='<div class="row"><button type="button" class="btn secondary" id="again">Take the test again \u2192</button></div>'+
+    '<p class="note" style="margin-top:10px">This test never asks you the same questions twice: there are 5 complete rounds of fresh questions.</p>';
+  screenEl.innerHTML=h;
+  document.getElementById("again").addEventListener("click",function(){
+    S.start=0;S.stage=0;S.qs=[];S.qi=0;S.correct=0;S.unknown=0;S.passed=[];S.failed={};S.done=false;S.result=null;initDots(0);intro();
+  });
+}
+
+/* ---------- QA hooks (screenshots only) ---------- */
+function dz(){var a=[],i;for(i=0;i<10;i++)a.push("done");return a}
+var dbg=(location.search.match(/debug=([a-z0-9+-]+)/i)||[])[1];
+initDots(0);
+if(dbg){
+  var forceQ=function(level,fmt,stage){
+    S.start=0;S.stage=stage||0;S.passed=[];S.done=false;initDots(0);
+    for(var i=0;i<(stage||0);i++){S.passed[i]=true}
+    S.qs=BANK[level].filter(function(q){return q.format===fmt});S.qi=0;showTracker();renderQ();
+  };
+  if(dbg==="mcq")forceQ("A1","mcq",0);
+  else if(dbg==="reading")forceQ("B2","mcq",2);
+  else if(dbg==="type")forceQ("A2","type",1);
+  else if(dbg==="order")forceQ("B1","order",2);
+  else if(dbg==="stage"){S.stage=1;S.passed=[true,true];initDots(0);S.dots[0]=dz();S.dots[1]=dz();showTracker();celebrate()}
+  else if(dbg==="result"){S.stage=2;S.passed=[true,true];initDots(0);S.dots[0]=dz();S.dots[1]=dz();S.dots[2]=dz();S.done=true;S.result="B1-";showTracker();result()}
+  else if(dbg==="a0"){S.done=true;S.result="A0";showTracker();result()}
+  else intro();
+}else{intro()}
+})();
+</script>
+</body>
+</html>
