@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Qui est-ce ? — Édition personnalité</title>
+<style>
+  :root{
+    --text:#2C2C2B; --text2:#7D7A75; --canvas:#FFFFFF; --soft:#F9F8F7; --soft2:#F0EFED;
+    --border:#E6E5E3; --blue:#2783DE; --blue-soft:#E5F2FC; --green:#46A171; --green-soft:#E8F1EC;
+    --red:#E56458; --red-soft:#FCE9E7; --orange:#D5803B; --orange-soft:#FBEBDE;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --text:#FFFFFF; --text2:rgba(255,255,255,.65); --canvas:#191919; --soft:#202020; --soft2:#383836;
+      --border:rgba(255,255,255,.2); --blue:#5E9FE8; --blue-soft:rgba(94,159,232,.12);
+      --green:#72BC8F; --green-soft:rgba(114,188,143,.12); --red:#E97366; --red-soft:rgba(233,115,102,.12);
+      --orange:#DE9255; --orange-soft:rgba(222,146,85,.12);
+    }
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--canvas); color:var(--text); font-size:16px; line-height:1.5; padding:16px;
+  }
+  .top{display:flex; flex-wrap:wrap; gap:12px; align-items:flex-start; justify-content:space-between; margin-bottom:12px;}
+  h1{font-size:22px; line-height:1.2;}
+  .badge{display:inline-block; font-size:12px; font-weight:600; color:var(--blue); background:var(--blue-soft);
+    border-radius:999px; padding:2px 10px; vertical-align:middle; margin-left:6px;}
+  .sub{color:var(--text2); font-size:14px; max-width:560px; margin-top:4px;}
+  .controls{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
+  .counter{font-size:14px; color:var(--text2); background:var(--soft); border:1px solid var(--border);
+    border-radius:8px; padding:9px 12px; white-space:nowrap;}
+  button{font:inherit; cursor:pointer; border-radius:8px; border:1px solid var(--border);
+    background:var(--soft); color:var(--text); padding:10px 14px; min-height:44px;}
+  button:hover{background:var(--soft2);}
+  button:focus-visible{outline:2px solid var(--blue); outline-offset:2px;}
+  #guessBtn.on{background:var(--orange-soft); border-color:var(--orange); color:var(--orange); font-weight:600;}
+  .answer{
+    border:1px solid var(--border); background:var(--soft); border-radius:8px;
+    padding:12px 16px; font-size:16px; margin-bottom:16px; min-height:50px; display:flex; align-items:center;
+  }
+  .answer.oui{background:var(--green-soft); border-color:var(--green);}
+  .answer.non{background:var(--red-soft); border-color:var(--red);}
+  .answer.win{background:var(--green-soft); border-color:var(--green); font-weight:600;}
+  .answer.guess{background:var(--orange-soft); border-color:var(--orange);}
+  main{display:grid; grid-template-columns:1fr 300px; gap:16px; align-items:start;}
+  .board{display:grid; grid-template-columns:repeat(4,1fr); gap:8px;}
+  .card{
+    border:1px solid var(--border); border-radius:8px; background:var(--canvas);
+    padding:12px 8px; text-align:center; cursor:pointer; min-height:104px;
+    transition:transform .25s, opacity .25s, background .25s;
+  }
+  .card:hover{background:var(--soft);}
+  .card:focus-visible{outline:2px solid var(--blue); outline-offset:2px;}
+  .card .emoji{font-size:26px; display:block;}
+  .card .noun{font-weight:600; font-size:15px; display:block; margin-top:4px;}
+  .card .adj{font-size:12.5px; color:var(--text2); display:block; margin-top:2px;}
+  .card.out{transform:rotateY(180deg); opacity:.35; background:var(--soft2);}
+  .card.win{border-color:var(--green); background:var(--green-soft);}
+  .questions{background:var(--soft); border:1px solid var(--border); border-radius:12px; padding:16px;}
+  .questions h2{font-size:15px; margin-bottom:4px;}
+  .qhint{font-size:13px; color:var(--text2); margin-bottom:12px;}
+  .qgroup h3{font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--text2); margin:12px 0 6px;}
+  .chip{
+    display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%;
+    text-align:left; font-size:14px; padding:9px 12px; margin-bottom:6px; background:var(--canvas);
+  }
+  .chip .tag{font-size:11px; font-weight:700; border-radius:999px; padding:1px 8px; flex-shrink:0; display:none;}
+  .chip.oui .tag{display:inline-block; color:var(--green); background:var(--green-soft);}
+  .chip.non .tag{display:inline-block; color:var(--red); background:var(--red-soft);}
+  footer{margin-top:16px; font-size:14px; color:var(--text2);
+    border-top:1px solid var(--border); padding-top:12px;}
+  @media (max-width:900px){
+    main{grid-template-columns:1fr;}
+    .board{grid-template-columns:repeat(3,1fr);}
+  }
+  @media (max-width:480px){
+    .board{grid-template-columns:repeat(2,1fr);}
+    body{padding:12px;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .card{transition:none;}
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1>Qui est-ce ?<span class="badge">Édition personnalité</span></h1>
+    <p class="sub">J'ai choisi une carte en secret. Pose une question <strong>à voix haute</strong>, puis clique dessus pour voir la réponse. Clique sur une carte pour l'éliminer (ou la remettre). <strong>Attention : 5 questions maximum ! Tu as un essai gratuit pour deviner — les essais suivants comptent comme une question.</strong></p>
+  </div>
+  <div class="controls">
+    <span class="counter" id="counter">0 question</span>
+    <button id="guessBtn" type="button">🎯 Je devine !</button>
+    <button id="newBtn" type="button">↺ Nouvelle partie</button>
+  </div>
+</header>
+<div class="answer" id="answer" role="status" aria-live="polite">🤫 C'est parti ! Pose ta première question…</div>
+<main>
+  <section class="board" id="board" aria-label="Cartes des traits de personnalité"></section>
+  <aside class="questions">
+    <h2>💬 Questions à poser</h2>
+    <p class="qhint">Dis la question à voix haute avant de cliquer !</p>
+    <div id="qlist"></div>
+  </aside>
+</main>
+<footer>💡 Pour deviner : « C'est quelqu'un <strong>qui</strong> est patient. » · « C'est une personne <strong>que</strong> j'admire pour sa patience. »</footer>
+<script>
+"use strict";
+var TRAITS = [
+  {noun:"la patience", adj:"patient / patiente", emoji:"🧘", f:{quality:1,time:1,social:0,work:0,help:0,boss:0,self:0,shy:0,curious:0,accept:0,elision:0,fem:1}},
+  {noun:"l'impatience", adj:"impatient / impatiente", emoji:"⏰", f:{quality:0,time:1,social:0,work:0,help:0,boss:0,self:0,shy:0,curious:0,accept:0,elision:1,fem:1}},
+  {noun:"la tolérance", adj:"tolérant / tolérante", emoji:"🕊️", f:{quality:1,time:0,social:1,work:0,help:0,boss:0,self:0,shy:0,curious:0,accept:1,elision:0,fem:1}},
+  {noun:"l'autorité", adj:"autoritaire", emoji:"👮", f:{quality:0,time:0,social:1,work:0,help:0,boss:1,self:0,shy:0,curious:0,accept:0,elision:1,fem:0}},
+  {noun:"la compétence", adj:"compétent / compétente", emoji:"🎓", f:{quality:1,time:0,social:0,work:1,help:0,boss:0,self:0,shy:0,curious:0,accept:0,elision:0,fem:1}},
+  {noun:"la disponibilité", adj:"disponible", emoji:"🤝", f:{quality:1,time:0,social:1,work:0,help:1,boss:0,self:0,shy:0,curious:0,accept:0,elision:0,fem:0}},
+  {noun:"la générosité", adj:"généreux / généreuse", emoji:"🎁", f:{quality:1,time:0,social:1,work:0,help:1,boss:0,self:0,shy:0,curious:0,accept:0,elision:0,fem:1}},
+  {noun:"l'égoïsme", adj:"égoïste", emoji:"🪞", f:{quality:0,time:0,social:1,work:0,help:0,boss:0,self:1,shy:0,curious:0,accept:0,elision:1,fem:0}},
+  {noun:"la timidité", adj:"timide", emoji:"😳", f:{quality:0,time:0,social:1,work:0,help:0,boss:0,self:0,shy:1,curious:0,accept:0,elision:0,fem:0}},
+  {noun:"la curiosité", adj:"curieux / curieuse", emoji:"🔍", f:{quality:1,time:0,social:0,work:0,help:0,boss:0,self:0,shy:0,curious:1,accept:0,elision:0,fem:1}},
+  {noun:"la chaleur", adj:"chaleureux / chaleureuse", emoji:"☀️", f:{quality:1,time:0,social:1,work:0,help:0,boss:0,self:0,shy:0,curious:0,accept:0,elision:0,fem:1}},
+  {noun:"la froideur", adj:"froid / froide", emoji:"❄️", f:{quality:0,time:0,social:1,work:0,help:0,boss:0,self:0,shy:1,curious:0,accept:0,elision:0,fem:1}}
+];
+var QUESTIONS = [
+  {cat:"Qualité ou défaut ?", label:"Est-ce que c'est une qualité ?", key:"quality", expect:1,
+   yes:"Oui, c'est une qualité ! 😊", no:"Non, ce n'est pas vraiment une qualité…"},
+  {cat:"Qualité ou défaut ?", label:"Est-ce que c'est plutôt un défaut ?", key:"quality", expect:0,
+   yes:"Oui, c'est plutôt un défaut ! 😅", no:"Non, ce n'est pas un défaut."},
+  {cat:"Le comportement", label:"Est-ce que ça concerne les relations avec les autres ?", key:"social", expect:1,
+   yes:"Oui, ça concerne les relations avec les autres.", no:"Non, ça ne concerne pas vraiment les autres."},
+  {cat:"Le comportement", label:"Est-ce que ça concerne le temps, l'attente ?", key:"time", expect:1,
+   yes:"Oui, ça concerne le temps et l'attente !", no:"Non, ça ne concerne pas le temps."},
+  {cat:"Le comportement", label:"Est-ce que ça concerne le travail, les capacités ?", key:"work", expect:1,
+   yes:"Oui, ça concerne le travail et les capacités !", no:"Non, ça ne concerne pas le travail."},
+  {cat:"Le comportement", label:"Est-ce que cette personne aime donner ou aider ?", key:"help", expect:1,
+   yes:"Oui, cette personne aime donner et aider !", no:"Non, ce n'est pas son point fort."},
+  {cat:"Le comportement", label:"Est-ce que cette personne aime commander ?", key:"boss", expect:1,
+   yes:"Oui, cette personne adore commander !", no:"Non, elle n'aime pas spécialement commander."},
+  {cat:"Le comportement", label:"Est-ce que cette personne pense d'abord à elle-même ?", key:"self", expect:1,
+   yes:"Oui, elle pense d'abord à elle-même…", no:"Non, elle ne pense pas d'abord à elle-même."},
+  {cat:"Le comportement", label:"Est-ce que cette personne est réservée ou distante ?", key:"shy", expect:1,
+   yes:"Oui, elle est réservée ou distante.", no:"Non, elle n'est ni réservée ni distante."},
+  {cat:"Le comportement", label:"Est-ce que cette personne s'intéresse à beaucoup de choses ?", key:"curious", expect:1,
+   yes:"Oui, elle s'intéresse à tout !", no:"Non, ce n'est pas sa grande passion."},
+  {cat:"Le comportement", label:"Est-ce que cette personne accepte les opinions différentes ?", key:"accept", expect:1,
+   yes:"Oui, elle accepte les opinions différentes !", no:"Non, pas spécialement."},
+  {cat:"Un peu de grammaire !", label:"Est-ce qu'on dit « l' » devant le nom ?", key:"elision", expect:1,
+   yes:"Oui ! Le nom commence par une voyelle : on dit « l'… ».", no:"Non, on dit « la … »."},
+  {cat:"Un peu de grammaire !", label:"Est-ce que l'adjectif change au féminin ?", key:"fem", expect:1,
+   yes:"Oui, l'adjectif change au féminin !", no:"Non, l'adjectif ne change pas au féminin."}
+];
+var MAX_Q=5;
+var secret=0, count=0, guessMode=false, over=false, freeGuessUsed=false;
+var board=document.getElementById("board"), qlist=document.getElementById("qlist"),
+    answer=document.getElementById("answer"), counter=document.getElementById("counter"),
+    guessBtn=document.getElementById("guessBtn"), newBtn=document.getElementById("newBtn");
+function setAnswer(txt, cls){ answer.textContent=txt; answer.className="answer"+(cls?" "+cls:""); }
+function setCount(n){ count=n; counter.textContent=n+" / "+MAX_Q+" questions"+(freeGuessUsed?"":" · 🎯 1 essai gratuit"); }
+function buildBoard(){
+  board.innerHTML="";
+  TRAITS.forEach(function(t,i){
+    var b=document.createElement("button");
+    b.type="button"; b.className="card"; b.dataset.i=i;
+    b.innerHTML='<span class="emoji" aria-hidden="true">'+t.emoji+'</span><span class="noun">'+t.noun+'</span><span class="adj">'+t.adj+'</span>';
+    b.addEventListener("click", function(){ onCard(i,b); });
+    board.appendChild(b);
+  });
+}
+function buildQuestions(){
+  qlist.innerHTML="";
+  var cats={};
+  QUESTIONS.forEach(function(q){
+    if(!cats[q.cat]){
+      var g=document.createElement("div"); g.className="qgroup";
+      var h=document.createElement("h3"); h.textContent=q.cat; g.appendChild(h);
+      qlist.appendChild(g); cats[q.cat]=g;
+    }
+    var c=document.createElement("button");
+    c.type="button"; c.className="chip";
+    c.innerHTML='<span>'+q.label+'</span><span class="tag"></span>';
+    c.addEventListener("click", function(){ ask(q,c); });
+    cats[q.cat].appendChild(c);
+  });
+}
+function ask(q, chip){
+  if(over){ return; }
+  if(count>=MAX_Q){ setAnswer("🚫 Plus de questions ! Il te reste un essai pour deviner : 🎯 Je devine !","guess"); return; }
+  setCount(count+1);
+  var val = TRAITS[secret].f[q.key]===1;
+  var ok = (val === (q.expect===1));
+  setAnswer(ok ? "✅ "+q.yes : "❌ "+q.no, ok ? "oui" : "non");
+  chip.classList.remove("oui","non");
+  chip.classList.add(ok?"oui":"non");
+  chip.querySelector(".tag").textContent = ok?"OUI":"NON";
+  checkLose();
+}
+function checkLose(){
+  if(!over && count>=MAX_Q && freeGuessUsed){
+    over=true;
+    toggleGuess(false);
+    var s=board.children[secret];
+    s.classList.remove("out"); s.classList.add("win");
+    setAnswer("😔 Perdu, lance une nouvelle partie ! (La réponse était "+TRAITS[secret].noun+" 🤫)","non");
+  }
+}
+function onCard(i, el){
+  if(over){ return; }
+  if(!guessMode){ el.classList.toggle("out"); return; }
+  if(freeGuessUsed){ setCount(count+1); } else { freeGuessUsed=true; setCount(count); }
+  if(i===secret){
+    over=true;
+    el.classList.remove("out"); el.classList.add("win");
+    setAnswer("🎉 Bravo ! C'était bien "+TRAITS[i].noun+" ("+TRAITS[i].adj+") — trouvé en "+count+(count>1?" questions":" question")+" !","win");
+    toggleGuess(false);
+  } else {
+    el.classList.add("out");
+    setAnswer("❌ Non, ce n'est pas "+TRAITS[i].noun+" ! Continue…","non");
+    toggleGuess(false);
+    checkLose();
+  }
+}
+function toggleGuess(on){
+  guessMode = (typeof on==="boolean") ? on : !guessMode;
+  guessBtn.classList.toggle("on", guessMode);
+  guessBtn.textContent = guessMode ? "👉 Clique sur ta carte !" : "🎯 Je devine !";
+  if(guessMode){ setAnswer("🎯 Dis ta réponse à voix haute (« C'est quelqu'un qui est… ! »), puis clique sur la carte.","guess"); }
+}
+function newGame(){
+  secret = Math.floor(Math.random()*TRAITS.length);
+  over=false; freeGuessUsed=false; setCount(0); toggleGuess(false);
+  buildBoard(); buildQuestions();
+  setAnswer("🤫 J'ai choisi une nouvelle carte en secret… Pose ta première question !");
+}
+guessBtn.addEventListener("click", function(){ if(!over){ toggleGuess(); } });
+newBtn.addEventListener("click", newGame);
+newGame();
+</script>
+</body>
+</html>
