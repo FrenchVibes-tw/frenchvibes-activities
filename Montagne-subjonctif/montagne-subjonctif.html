@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La montagne du subjonctif</title>
+<style>
+:root{
+  --sky1:#dff1ff; --sky2:#f7fbff; --rock:#7d8ea8; --rock2:#5d6d85; --snow:#ffffff;
+  --ink:#22303f; --muted:#65788c; --ok:#1f9d55; --ko:#d64545; --accent:#2f6fed; --card:#ffffff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;color:var(--ink);background:linear-gradient(180deg,var(--sky1),var(--sky2));padding:18px}
+.wrap{max-width:820px;margin:0 auto}
+h1{font-size:1.5rem;margin:0 0 4px}
+.sub{color:var(--muted);font-size:.92rem;margin:0 0 14px}
+.card{background:var(--card);border:1px solid #e2e8f0;border-radius:16px;padding:18px;box-shadow:0 6px 22px rgba(30,50,80,.07)}
+.mountain{width:100%;height:auto;display:block;border-radius:14px;background:linear-gradient(180deg,#cfe8ff,#eef7ff)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0 6px;flex-wrap:wrap}
+.badge{background:#eef3fb;border-radius:999px;padding:5px 12px;font-size:.82rem;color:var(--muted)}
+.q{font-size:1.12rem;line-height:1.6;margin:10px 0 14px}
+.q b{background:#fff3c4;padding:0 4px;border-radius:4px}
+.opts{display:grid;gap:9px}
+button.opt{text-align:left;padding:12px 14px;border-radius:12px;border:1.5px solid #dbe3ee;background:#fbfdff;font-size:1rem;cursor:pointer;transition:.15s;font-family:inherit}
+button.opt:hover{border-color:var(--accent);background:#f2f7ff}
+button.opt.good{border-color:var(--ok);background:#e9f8ef}
+button.opt.bad{border-color:var(--ko);background:#fdecec}
+button.opt:disabled{cursor:default}
+.fill{display:flex;gap:8px;flex-wrap:wrap}
+.fill input{flex:1;min-width:190px;padding:12px 14px;font-size:1rem;border-radius:12px;border:1.5px solid #dbe3ee;font-family:inherit}
+.btn{padding:12px 18px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:.98rem;cursor:pointer;font-family:inherit;font-weight:600}
+.btn.ghost{background:#eef3fb;color:var(--ink)}
+.fb{margin-top:12px;padding:12px 14px;border-radius:12px;font-size:.95rem;line-height:1.55;display:none}
+.fb.show{display:block}
+.fb.ok{background:#e9f8ef;border:1px solid #bfe7cf}
+.fb.ko{background:#fdecec;border:1px solid #f3c9c9}
+.fb .tip{color:var(--muted);display:block;margin-top:6px}
+.foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:10px}
+.hidden{display:none}
+.end h2{margin:6px 0}
+.recap{margin-top:12px;border-top:1px solid #e6ecf3;padding-top:10px}
+.recap div{padding:6px 0;font-size:.92rem;border-bottom:1px dashed #eef2f7}
+.tag{display:inline-block;font-size:.72rem;background:#eef3fb;color:var(--muted);border-radius:6px;padding:2px 7px;margin-right:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>⛰️ La montagne du subjonctif</h1>
+  <p class="sub">Le subjonctif, on en fait toute une montagne… Répondez aux <b>10 questions</b> et atteignez le sommet ! Chaque étape teste un point différent. À chaque nouvelle partie, de <b>nouvelles questions</b>.</p>
+
+  <div class="card">
+    <svg class="mountain" id="mtn" viewBox="0 0 600 260" xmlns="http://www.w3.org/2000/svg" aria-label="Progression">
+      <circle cx="520" cy="48" r="22" fill="#ffe08a"/>
+      <path d="M0 260 L110 150 L165 195 L250 95 L330 160 L410 62 L500 175 L600 118 L600 260 Z" fill="#9fb4cd" opacity=".55"/>
+      <path d="M0 260 L120 176 L200 220 L300 120 L360 168 L440 40 L520 150 L600 200 L600 260 Z" fill="#7d8ea8"/>
+      <path d="M440 40 L470 78 L455 82 L440 72 L425 84 L410 78 Z" fill="#ffffff"/>
+      <path d="M300 120 L320 146 L308 148 L300 141 L290 150 L280 145 Z" fill="#ffffff" opacity=".9"/>
+      <g id="steps"></g>
+      <text x="440" y="28" text-anchor="middle" font-size="16">🚩</text>
+    </svg>
+
+    <div class="bar">
+      <span class="badge" id="pos">Étape 1 / 10</span>
+      <span class="badge" id="theme">—</span>
+      <span class="badge" id="score">Score : 0</span>
+    </div>
+
+    <div id="game">
+      <div class="q" id="question"></div>
+      <div class="opts" id="opts"></div>
+      <div class="fb" id="fb"></div>
+      <div class="foot">
+        <span class="badge" id="hint">Choisissez la bonne réponse</span>
+        <button class="btn hidden" id="next">Étape suivante →</button>
+      </div>
+    </div>
+
+    <div id="end" class="end hidden">
+      <h2 id="endTitle"></h2>
+      <p id="endMsg" class="sub"></p>
+      <button class="btn" id="again">🔁 Nouvelle ascension (nouvelles questions)</button>
+      <div class="recap" id="recap"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const THEMES = {
+  forme:"Les formes régulières",
+  irreg:"Les verbes irréguliers",
+  radicaux:"Deux radicaux (nous / vous)",
+  volonte:"Volonté et ordre",
+  sentiment:"Les sentiments",
+  doute:"Doute ou certitude",
+  opinion:"Opinion, espérer, sembler",
+  jugement:"Jugement et nécessité",
+  locutions:"Les locutions",
+  infinitif:"Subjonctif ou infinitif"
+};
+const ORDER = ["forme","irreg","radicaux","volonte","sentiment","doute","opinion","jugement","locutions","infinitif"];
+
+const BANK = [
+// 1. formes régulières
+{id:"f1",c:"forme",t:"fill",q:"Il faut que tu (parler) ___ plus fort.",a:["parles"],tip:"Radical de « ils parlent » + terminaison -es."},
+{id:"f2",c:"forme",t:"fill",q:"Je veux qu'elle (finir) ___ son travail.",a:["finisse"],tip:"Ils finiss-ent → que je/elle finisse."},
+{id:"f3",c:"forme",t:"fill",q:"Bien qu'il (attendre) ___ depuis une heure, il reste calme.",a:["attende"],tip:"Ils attend-ent → qu'il attende."},
+{id:"f4",c:"forme",t:"qcm",q:"Il faut que vous ___ ce documentaire. (regarder)",o:["regardez","regardiez","regarderez"],a:1,tip:"Avec « vous », le subjonctif ressemble à l'imparfait : que vous regardiez."},
+{id:"f5",c:"forme",t:"fill",q:"Pour que je (répondre) ___, pose une question claire.",a:["reponde"],tip:"Ils répond-ent → que je réponde."},
+{id:"f6",c:"forme",t:"fill",q:"Il est important qu'ils (réfléchir) ___ avant de décider.",a:["reflechissent"],tip:"Ils réfléchiss-ent → qu'ils réfléchissent (forme identique au présent)."},
+{id:"f7",c:"forme",t:"qcm",q:"Je souhaite que tu m'___ jusqu'au bout. (écouter)",o:["écoutes","écouteras","écoutais"],a:0,tip:"Le subjonctif n'a pas de futur : que tu écoutes."},
+
+// 2. irréguliers
+{id:"i1",c:"irreg",t:"fill",q:"Il faut que tu (être) ___ patient.",a:["sois"],tip:"être : que je sois, que tu sois, qu'il soit, que nous soyons, que vous soyez, qu'ils soient."},
+{id:"i2",c:"irreg",t:"fill",q:"Je doute qu'ils (avoir) ___ raison.",a:["aient"],tip:"avoir : que j'aie, que nous ayons, qu'ils aient."},
+{id:"i3",c:"irreg",t:"qcm",q:"Il faudrait qu'on ___ chez le coiffeur. (aller)",o:["va","aille","ailles"],a:1,tip:"« on » = 3e personne du singulier → qu'on aille."},
+{id:"i4",c:"irreg",t:"fill",q:"Il est essentiel que vous (faire) ___ attention.",a:["fassiez"],tip:"faire : que je fasse, que nous fassions, que vous fassiez."},
+{id:"i5",c:"irreg",t:"fill",q:"Je ne crois pas qu'elle (savoir) ___ la réponse.",a:["sache"],tip:"savoir : que je sache, que nous sachions."},
+{id:"i6",c:"irreg",t:"qcm",q:"Il est possible qu'il ne ___ pas venir. (pouvoir)",o:["peut","puisse","pourra"],a:1,tip:"pouvoir : que je puisse, que nous puissions."},
+{id:"i7",c:"irreg",t:"fill",q:"Bien que je (vouloir) ___ t'aider, je n'ai pas le temps.",a:["veuille"],tip:"vouloir : que je veuille, que nous voulions, qu'ils veuillent."},
+{id:"i8",c:"irreg",t:"qcm",q:"Je pars avant qu'il ___ ! (pleuvoir)",o:["pleut","pleuve","pleuvra"],a:1,tip:"pleuvoir : qu'il pleuve. De même : qu'il faille, qu'il vaille."},
+
+// 3. deux radicaux
+{id:"r1",c:"radicaux",t:"fill",q:"Il faut que nous (prendre) ___ le train de 8 h.",a:["prenions"],tip:"Avec nous/vous, on utilise la forme de l'imparfait : que nous prenions."},
+{id:"r2",c:"radicaux",t:"fill",q:"Il faudrait que vous (venir) ___ plus tôt.",a:["veniez"],tip:"que je vienne MAIS que vous veniez."},
+{id:"r3",c:"radicaux",t:"qcm",q:"Il est important que nous ___ assez d'eau. (boire)",o:["boivions","buvions","boivons"],a:1,tip:"que je boive / que nous buvions (comme l'imparfait « nous buvions »)."},
+{id:"r4",c:"radicaux",t:"fill",q:"Je veux que vous (voir) ___ ce film.",a:["voyiez"],tip:"que je voie / que vous voyiez. Attention au « i » après le « y »."},
+{id:"r5",c:"radicaux",t:"fill",q:"Il faut que nous (appeler) ___ le client aujourd'hui.",a:["appelions"],tip:"que j'appelle / que nous appelions (un seul « l »)."},
+{id:"r6",c:"radicaux",t:"qcm",q:"Il est dommage que vous ___ ce risque. (prendre)",o:["prenez","preniez","prenniez"],a:1,tip:"Jamais deux « n » : que vous preniez."},
+{id:"r7",c:"radicaux",t:"qcm",q:"Il faut que nous ___ partir. (devoir)",o:["devions","doivions","devons"],a:0,tip:"que je doive / que nous devions."},
+
+// 4. volonté / ordre
+{id:"v1",c:"volonte",t:"qcm",q:"Le directeur exige que tous les employés ___ ponctuels.",o:["sont","soient","seront"],a:1,tip:"Exiger que = volonté → subjonctif."},
+{id:"v2",c:"volonte",t:"qcm",q:"Je veux que tu ___ tout de suite.",o:["pars","partes","partiras"],a:1,tip:"Vouloir que + subjonctif. (Même sujet, on dirait : je veux partir.)"},
+{id:"v3",c:"volonte",t:"qcm",q:"Il faut que vous ___ le règlement intérieur.",o:["lisez","lisiez","lirez"],a:1,tip:"Il faut que + subjonctif, toujours."},
+{id:"v4",c:"volonte",t:"qcm",q:"Elle demande que nous ___ à l'heure.",o:["sommes","soyons","serons"],a:1,tip:"Demander que = ordre atténué → subjonctif."},
+{id:"v5",c:"volonte",t:"qcm",q:"Le professeur interdit qu'on ___ du bruit.",o:["fait","fasse","fera"],a:1,tip:"Interdire que + subjonctif."},
+{id:"v6",c:"volonte",t:"qcm",q:"Je souhaite que tu ___ ton entretien.",o:["réussis","réussisses","réussiras"],a:1,tip:"Souhaiter que + subjonctif (≠ espérer que + indicatif)."},
+{id:"v7",c:"volonte",t:"qcm",q:"L'entreprise préfère que ses salariés ___ une tenue sobre.",o:["portent","porteront","porteraient"],a:0,tip:"Préférer que + subjonctif : ici la forme est identique au présent (qu'ils portent)."},
+
+// 5. sentiment
+{id:"s1",c:"sentiment",t:"qcm",q:"Je suis content que tu ___ là.",o:["es","sois","seras"],a:1,tip:"Sentiment + deux sujets différents → subjonctif."},
+{id:"s2",c:"sentiment",t:"qcm",q:"Elle a peur qu'il ne ___ pas.",o:["revient","revienne","reviendra"],a:1,tip:"Avoir peur que + subjonctif (le « ne » est explétif)."},
+{id:"s3",c:"sentiment",t:"qcm",q:"Ça m'énerve que les gens ___ impolis.",o:["sont","soient","étaient"],a:1,tip:"Réaction affective → subjonctif."},
+{id:"s4",c:"sentiment",t:"qcm",q:"Je regrette que vous ne ___ pas rester.",o:["pouvez","puissiez","pourrez"],a:1,tip:"Regretter que + subjonctif."},
+{id:"s5",c:"sentiment",t:"qcm",q:"Nous sommes surpris qu'elle ___ si jeune.",o:["est","soit","sera"],a:1,tip:"Être surpris que + subjonctif."},
+{id:"s6",c:"sentiment",t:"qcm",q:"Il est triste que tu ___ déjà partir.",o:["dois","doives","devras"],a:1,tip:"Sentiment → subjonctif : que tu doives."},
+{id:"s7",c:"sentiment",t:"qcm",q:"Je suis étonné que ce règlement ___ encore en vigueur.",o:["est","soit","sera"],a:1,tip:"Être étonné que + subjonctif."},
+
+// 6. doute / certitude
+{id:"d1",c:"doute",t:"qcm",q:"Je suis sûr qu'il ___ raison.",o:["a","ait"],a:0,tip:"Certitude → indicatif."},
+{id:"d2",c:"doute",t:"qcm",q:"Je doute qu'il ___ raison.",o:["a","ait"],a:1,tip:"Douter que → subjonctif."},
+{id:"d3",c:"doute",t:"qcm",q:"Il est évident que ce style lui ___ bien.",o:["va","aille"],a:0,tip:"Il est évident que → indicatif."},
+{id:"d4",c:"doute",t:"qcm",q:"Il se peut que le magasin ___ fermé.",o:["est","soit"],a:1,tip:"Il se peut que → subjonctif."},
+{id:"d5",c:"doute",t:"qcm",q:"Il est certain que nous ___ en retard.",o:["sommes","soyons"],a:0,tip:"Certitude → indicatif."},
+{id:"d6",c:"doute",t:"qcm",q:"Il est peu probable qu'il ___ à temps.",o:["finit","finisse"],a:1,tip:"« Peu probable » = doute → subjonctif. Mais « il est probable que » → indicatif !"},
+{id:"d7",c:"doute",t:"qcm",q:"Il est probable que l'entreprise ___ ses règles.",o:["changera","change"],a:0,tip:"Probabilité forte → indicatif (à l'inverse de « possible que »)."},
+
+// 7. opinion / espérer / sembler
+{id:"o1",c:"opinion",t:"qcm",q:"J'espère que tu ___ bientôt.",o:["viendras","viennes"],a:0,tip:"Piège n°1 : espérer que + INDICATIF."},
+{id:"o2",c:"opinion",t:"qcm",q:"Je pense qu'il ___ compétent.",o:["est","soit"],a:0,tip:"Penser que à l'affirmatif → indicatif."},
+{id:"o3",c:"opinion",t:"qcm",q:"Je ne pense pas qu'il ___ compétent.",o:["est","soit"],a:1,tip:"Penser que au négatif → subjonctif."},
+{id:"o4",c:"opinion",t:"qcm",q:"Crois-tu qu'elle ___ la vérité ?",o:["dit","dise"],a:1,tip:"Forme interrogative avec inversion → subjonctif."},
+{id:"o5",c:"opinion",t:"qcm",q:"Il me semble que ce dresscode ___ exagéré.",o:["est","soit"],a:0,tip:"« Il ME semble que » → indicatif."},
+{id:"o6",c:"opinion",t:"qcm",q:"Il semble que ce dresscode ___ exagéré.",o:["est","soit"],a:1,tip:"« Il semble que » (sans pronom) → subjonctif."},
+{id:"o7",c:"opinion",t:"qcm",q:"Je ne trouve pas que la règle ___ juste.",o:["est","soit"],a:1,tip:"Trouver que au négatif → subjonctif."},
+
+// 8. jugement / nécessité
+{id:"j1",c:"jugement",t:"qcm",q:"Il est normal que tu ___ fatigué après cette journée.",o:["es","sois"],a:1,tip:"Jugement → subjonctif."},
+{id:"j2",c:"jugement",t:"qcm",q:"Il est dommage qu'ils ne ___ pas venir.",o:["peuvent","puissent"],a:1,tip:"Il est dommage que + subjonctif."},
+{id:"j3",c:"jugement",t:"qcm",q:"Il vaut mieux que vous ___ tôt.",o:["partez","partiez"],a:1,tip:"Il vaut mieux que + subjonctif."},
+{id:"j4",c:"jugement",t:"qcm",q:"Il est utile que nous ___ un plan B.",o:["avons","ayons"],a:1,tip:"Il est utile que + subjonctif."},
+{id:"j5",c:"jugement",t:"qcm",q:"Il est temps que tu ___ une décision.",o:["prends","prennes"],a:1,tip:"Il est temps que + subjonctif."},
+{id:"j6",c:"jugement",t:"qcm",q:"Il est inadmissible qu'on ___ si sévère avec les stagiaires.",o:["est","soit"],a:1,tip:"Jugement de valeur → subjonctif."},
+{id:"j7",c:"jugement",t:"qcm",q:"Il est vrai que ce règlement ___ très strict.",o:["est","soit"],a:0,tip:"Attention : « il est vrai que » affirme un fait → indicatif."},
+
+// 9. locutions
+{id:"l1",c:"locutions",t:"qcm",q:"___ il soit compétent, il n'a pas été retenu.",o:["Parce qu'","Bien qu'","Puisqu'"],a:1,tip:"Concession (bien que, quoique) → subjonctif ; cause (parce que, puisque) → indicatif."},
+{id:"l2",c:"locutions",t:"qcm",q:"Je t'appelle avant que tu ___.",o:["pars","partes"],a:1,tip:"Avant que + subjonctif."},
+{id:"l3",c:"locutions",t:"qcm",q:"Après qu'il ___ le contrat, tout est allé très vite.",o:["a signé","ait signé"],a:0,tip:"Après que + indicatif (contrairement à avant que)."},
+{id:"l4",c:"locutions",t:"qcm",q:"Je répète pour que tu ___ mieux.",o:["comprends","comprennes"],a:1,tip:"Pour que / afin que (but) → subjonctif."},
+{id:"l5",c:"locutions",t:"qcm",q:"Tant qu'il ___ du soleil, on reste dehors.",o:["y a","y ait"],a:0,tip:"Tant que → indicatif (durée réelle)."},
+{id:"l6",c:"locutions",t:"qcm",q:"J'attends jusqu'à ce que tu ___ prêt.",o:["es","sois"],a:1,tip:"Jusqu'à ce que → subjonctif."},
+{id:"l7",c:"locutions",t:"qcm",q:"À condition que vous ___ le règlement, c'est possible.",o:["respectez","respectiez"],a:1,tip:"À condition que → subjonctif."},
+{id:"l8",c:"locutions",t:"qcm",q:"Depuis qu'elle ___ ce poste, elle est plus sereine.",o:["a","ait"],a:0,tip:"Depuis que → indicatif (fait réel et daté)."},
+{id:"l9",c:"locutions",t:"qcm",q:"Il est parti sans qu'on ___ le temps de lui parler.",o:["a","ait"],a:1,tip:"Sans que → subjonctif."},
+{id:"l10",c:"locutions",t:"qcm",q:"Pendant qu'elle ___ son CV, j'ai préparé le café.",o:["finissait","finisse"],a:0,tip:"Pendant que → indicatif."},
+
+// 10. subjonctif ou infinitif
+{id:"n1",c:"infinitif",t:"qcm",q:"Je suis content ___ en vacances la semaine prochaine. (moi)",o:["de partir","que je parte"],a:0,tip:"Même sujet → infinitif. Le français évite « que » inutile."},
+{id:"n2",c:"infinitif",t:"qcm",q:"Je suis content ___ en vacances. (toi)",o:["que tu partes","de tu partir"],a:0,tip:"Deux sujets différents → que + subjonctif."},
+{id:"n3",c:"infinitif",t:"qcm",q:"Il faut ___ le code vestimentaire. (règle générale)",o:["respecter","que respecter"],a:0,tip:"Il faut + infinitif quand il n'y a pas de sujet précis (sans préposition)."},
+{id:"n4",c:"infinitif",t:"qcm",q:"Elle a peur ___ l'entretien. (elle-même)",o:["de ne pas réussir","qu'elle ne réussisse pas"],a:0,tip:"Même sujet → « de » + infinitif."},
+{id:"n5",c:"infinitif",t:"qcm",q:"J'ai révisé ___ l'examen. (moi)",o:["pour réussir","pour que je réussisse"],a:0,tip:"Même sujet → pour + infinitif."},
+{id:"n6",c:"infinitif",t:"qcm",q:"J'ai tout expliqué ___ mes élèves réussissent.",o:["pour","pour que"],a:1,tip:"Sujets différents → pour que + subjonctif."},
+{id:"n7",c:"infinitif",t:"qcm",q:"___ pour l'entretien, vérifie ta tenue. (toi dans les deux parties)",o:["Avant de partir","Avant que tu partes"],a:0,tip:"Même sujet → avant de + infinitif."},
+{id:"n8",c:"infinitif",t:"qcm",q:"Je préfère ___ seul ce dossier.",o:["traiter","que je traite"],a:0,tip:"Même sujet → infinitif sans « que »."}
+];
+
+/* ---------- outils ---------- */
+const KEY = "montagne_subjonctif_vus_v1";
+function loadSeen(){ try{ return JSON.parse(localStorage.getItem(KEY)) || []; }catch(e){ return []; } }
+function saveSeen(a){ try{ localStorage.setItem(KEY, JSON.stringify(a)); }catch(e){} }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function norm(s){ return s.toLowerCase().trim().replace(/[’']/g,"'").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," "); }
+
+function pickRound(){
+  let seen = loadSeen();
+  const picked = [];
+  for(const cat of ORDER){
+    const pool = BANK.filter(q=>q.c===cat);
+    let fresh = pool.filter(q=>!seen.includes(q.id));
+    if(fresh.length===0){ // catégorie épuisée : on la recycle
+      seen = seen.filter(id=>!pool.some(q=>q.id===id));
+      fresh = pool.slice();
+    }
+    const chosen = fresh[Math.floor(Math.random()*fresh.length)];
+    picked.push(chosen);
+    seen.push(chosen.id);
+  }
+  saveSeen(seen);
+  return picked; // ordre pédagogique : forme → usage
+}
+
+/* ---------- montagne ---------- */
+const STEP_POS = [[40,236],[95,208],[142,196],[192,178],[236,158],[280,140],[318,122],[356,100],[398,72],[440,44]];
+function drawSteps(state){
+  const g = document.getElementById("steps");
+  g.innerHTML = "";
+  const ns="http://www.w3.org/2000/svg";
+  const path = document.createElementNS(ns,"polyline");
+  path.setAttribute("points", STEP_POS.map(p=>p.join(",")).join(" "));
+  path.setAttribute("fill","none"); path.setAttribute("stroke","#ffffff");
+  path.setAttribute("stroke-width","2.5"); path.setAttribute("stroke-dasharray","5 5"); path.setAttribute("opacity",".75");
+  g.appendChild(path);
+  STEP_POS.forEach((p,i)=>{
+    const c = document.createElementNS(ns,"circle");
+    c.setAttribute("cx",p[0]); c.setAttribute("cy",p[1]); c.setAttribute("r", i===state.current?11:9);
+    const st = state.results[i];
+    c.setAttribute("fill", st===true? "#1f9d55" : st===false? "#d64545" : (i===state.current? "#2f6fed" : "#ffffff"));
+    c.setAttribute("stroke", "#22303f"); c.setAttribute("stroke-width", i===state.current?"2.5":"1.2");
+    g.appendChild(c);
+    const t = document.createElementNS(ns,"text");
+    t.setAttribute("x",p[0]); t.setAttribute("y",p[1]+3.5); t.setAttribute("text-anchor","middle");
+    t.setAttribute("font-size","9"); t.setAttribute("font-weight","700");
+    t.setAttribute("fill", (st===undefined && i!==state.current) ? "#22303f" : "#ffffff");
+    t.textContent = i+1;
+    g.appendChild(t);
+  });
+  const done = state.results.filter(r=>r!==undefined).length;
+  const climber = document.createElementNS(ns,"text");
+  const p = STEP_POS[Math.min(done, 9)];
+  climber.setAttribute("x", p[0]); climber.setAttribute("y", p[1]-14);
+  climber.setAttribute("text-anchor","middle"); climber.setAttribute("font-size","16");
+  climber.textContent = done>=10 ? "🏔️" : "🧗";
+  g.appendChild(climber);
+}
+
+/* ---------- jeu ---------- */
+let state;
+function start(){
+  state = { qs: pickRound(), current:0, results:new Array(10), score:0, log:[] };
+  document.getElementById("end").classList.add("hidden");
+  document.getElementById("game").classList.remove("hidden");
+  render();
+}
+
+function render(){
+  const q = state.qs[state.current];
+  drawSteps(state);
+  document.getElementById("pos").textContent = "Étape " + (state.current+1) + " / 10";
+  document.getElementById("theme").textContent = "🎯 " + THEMES[q.c];
+  document.getElementById("score").textContent = "Score : " + state.score;
+  document.getElementById("question").innerHTML = q.q.replace("___","<b>&nbsp;?&nbsp;</b>");
+  const opts = document.getElementById("opts");
+  opts.innerHTML = "";
+  const fb = document.getElementById("fb"); fb.className="fb"; fb.innerHTML="";
+  document.getElementById("next").classList.add("hidden");
+
+  if(q.t==="qcm"){
+    document.getElementById("hint").textContent = "Choisissez la bonne réponse";
+    q.o.forEach((txt,i)=>{
+      const b=document.createElement("button");
+      b.className="opt"; b.textContent=txt;
+      b.onclick=()=>answer(i===q.a, q.o[q.a], b, opts);
+      opts.appendChild(b);
+    });
+  } else {
+    document.getElementById("hint").textContent = "Écrivez le verbe au subjonctif présent";
+    const box=document.createElement("div"); box.className="fill";
+    const inp=document.createElement("input"); inp.placeholder="votre réponse…"; inp.autocomplete="off";
+    const btn=document.createElement("button"); btn.className="btn"; btn.textContent="Vérifier";
+    const go=()=>{ if(!inp.value.trim()) return; const ok=q.a.some(x=>norm(x)===norm(inp.value)); inp.disabled=true; btn.disabled=true; answer(ok, q.a[0], null, opts); };
+    btn.onclick=go; inp.addEventListener("keydown",e=>{ if(e.key==="Enter") go(); });
+    box.appendChild(inp); box.appendChild(btn); opts.appendChild(box);
+    setTimeout(()=>inp.focus(),50);
+  }
+}
+
+function answer(ok, correct, btn, opts){
+  const q = state.qs[state.current];
+  state.results[state.current] = ok;
+  if(ok) state.score++;
+  state.log.push({theme:THEMES[q.c], q:q.q, ok:ok, correct:correct});
+  if(q.t==="qcm"){
+    [...opts.querySelectorAll("button.opt")].forEach((b,i)=>{
+      b.disabled=true;
+      if(i===q.a) b.classList.add("good");
+      if(b===btn && !ok) b.classList.add("bad");
+    });
+  }
+  const fb=document.getElementById("fb");
+  fb.className = "fb show " + (ok?"ok":"ko");
+  fb.innerHTML = (ok? "✅ <b>Bravo !</b> " : "❌ <b>Presque.</b> La bonne réponse : <b>"+correct+"</b>. ") +
+                 "<span class='tip'>💡 "+q.tip+"</span>";
+  drawSteps(state);
+  document.getElementById("score").textContent = "Score : " + state.score;
+  const next=document.getElementById("next");
+  next.classList.remove("hidden");
+  next.textContent = state.current===9 ? "🏔️ Voir le sommet" : "Étape suivante →";
+}
+
+document.getElementById("next").onclick = ()=>{
+  if(state.current===9){ finish(); } else { state.current++; render(); }
+};
+document.getElementById("again").onclick = start;
+
+function finish(){
+  state.current = 10;
+  drawSteps(state);
+  document.getElementById("game").classList.add("hidden");
+  const end=document.getElementById("end"); end.classList.remove("hidden");
+  const s=state.score;
+  let title, msg;
+  if(s===10){ title="🏔️ Sommet atteint — 10/10 !"; msg="Parfait. Le subjonctif n'est plus une montagne pour vous."; }
+  else if(s>=8){ title="⛰️ "+s+"/10 — Presque au sommet !"; msg="Très solide. Relisez les explications des étapes ratées et retentez : les questions changent."; }
+  else if(s>=5){ title="🥾 "+s+"/10 — À mi-pente"; msg="Bonne base. Revoyez le tableau des déclencheurs, puis refaites une ascension."; }
+  else { title="🧗 "+s+"/10 — Le camp de base"; msg="Pas de panique : relisez le récap en haut de page, puis recommencez. On progresse vite."; }
+  document.getElementById("endTitle").textContent=title;
+  document.getElementById("endMsg").textContent=msg;
+  const r=document.getElementById("recap"); r.innerHTML="<b>Récapitulatif</b>";
+  state.log.forEach((l,i)=>{
+    const d=document.createElement("div");
+    d.innerHTML = (l.ok?"✅":"❌")+" <span class='tag'>"+(i+1)+". "+l.theme+"</span> "+l.q.replace("___","<b>"+l.correct+"</b>");
+    r.appendChild(d);
+  });
+}
+
+start();
+</script>
+</body>
+</html>

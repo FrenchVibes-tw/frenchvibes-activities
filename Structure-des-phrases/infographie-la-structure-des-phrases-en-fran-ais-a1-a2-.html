@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La structure des phrases en français (A1-A2) - Infographie</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #F3E8FF 0%, #E9D5FF 50%, #FAF5FF 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .infographic {
+            width: 1080px;
+            min-height: 1520px;
+            background: linear-gradient(180deg, #FEFBFF 0%, #FAF5FF 100%);
+            padding: 60px 50px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+            box-shadow: 0 8px 32px rgba(139, 92, 246, 0.15);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 52px;
+            font-weight: 700;
+            color: #1F2937;
+            margin-bottom: 16px;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 20px;
+            color: #6B7280;
+            font-weight: 500;
+        }
+
+        .section-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1F2937;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .table-section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .table-section h3 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1F2937;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        th {
+            background: #F3F4F6;
+            padding: 16px 20px;
+            text-align: left;
+            font-weight: 700;
+            color: #1F2937;
+            font-size: 15px;
+        }
+
+        th:first-child {
+            border-top-left-radius: 8px;
+        }
+
+        th:last-child {
+            border-top-right-radius: 8px;
+        }
+
+        td {
+            padding: 16px 20px;
+            font-size: 15px;
+            color: #4B5563;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        tr:nth-child(even) td {
+            background: #F9FAFB;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table-note {
+            margin-top: 16px;
+            font-size: 14px;
+            color: #6B7280;
+            font-style: italic;
+            line-height: 1.6;
+        }
+
+        .usage-blocks {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .usage-block {
+            padding: 24px 28px;
+            border-radius: 14px;
+            background: #EFF6FF;
+            border-left: 5px solid #3B82F6;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        }
+
+        .usage-block h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1F2937;
+            margin-bottom: 10px;
+        }
+
+        .usage-block p {
+            font-size: 16px;
+            color: #4B5563;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .usage-block .example {
+            font-style: italic;
+            color: #6B7280;
+            font-size: 15px;
+        }
+
+        .usage-note {
+            margin-top: 16px;
+            font-size: 15px;
+            color: #6B7280;
+            font-style: italic;
+            line-height: 1.6;
+        }
+
+        .key-points {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+        .key-point {
+            padding: 24px;
+            border-radius: 14px;
+            background: white;
+            border: 2px solid #3B82F6;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .key-point h4 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1F2937;
+            margin-bottom: 12px;
+        }
+
+        .key-point p {
+            font-size: 15px;
+            color: #4B5563;
+            line-height: 1.6;
+        }
+
+        .tip-section {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .tip-box {
+            background: linear-gradient(135deg, #DDD6FE 0%, #E9D5FF 100%);
+            padding: 28px 32px;
+            border-radius: 16px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+            border-left: 6px solid #8B5CF6;
+        }
+
+        .tip-box h3 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1F2937;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tip-box p {
+            font-size: 16px;
+            color: #4B5563;
+            line-height: 1.7;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px 48px;
+        }
+
+        .step {
+            position: relative;
+        }
+
+        .step::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            right: -24px;
+            width: 80px;
+            height: 2px;
+            background: #3B82F6;
+        }
+
+        .step:nth-child(2)::after,
+        .step:nth-child(4)::after {
+            display: none;
+        }
+
+        .step-num {
+            font-size: 20px;
+            font-weight: 600;
+            color: #3B82F6;
+            margin-bottom: 8px;
+        }
+
+        .step-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1F2937;
+            margin-bottom: 6px;
+        }
+
+        .step-desc {
+            font-size: 15px;
+            color: #6B7280;
+        }
+
+        .error-box {
+            background: #FEF3C7;
+            padding: 20px 24px;
+            border-radius: 12px;
+            border-left: 4px solid #F59E0B;
+            font-size: 15px;
+            color: #78350F;
+            line-height: 1.6;
+        }
+
+        .footer {
+            text-align: right;
+            margin-top: auto;
+            padding-top: 20px;
+        }
+
+        .footer-badge {
+            display: inline-block;
+            background: #1E40AF;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 24px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="infographic">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-icon">📋</div>
+            <h1>La structure des phrases en français (A1-A2)</h1>
+            <p>L'ordre des mots et l'organisation des éléments dans une phrase française simple</p>
+        </div>
+
+        <!-- Table Section -->
+        <div class="table-section">
+            <h3>Vue d'ensemble</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Forme</th>
+                        <th>Fonction / Construction</th>
+                        <th>Exemple</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    <tr>
+                        <td><strong>Sujet + Verbe + Complément</strong></td>
+                        <td>Structure de base affirmative</td>
+                        <td>"Marie mange une pomme."</td>
+                    </tr>
+                    
+                    <tr>
+                        <td><strong>Est-ce que + Sujet + Verbe ?</strong></td>
+                        <td>Question fermée (oui/non)</td>
+                        <td>"Est-ce que tu viens demain ?"</td>
+                    </tr>
+                    
+                    <tr>
+                        <td><strong>Mot interrogatif + Verbe + Sujet ?</strong></td>
+                        <td>Question ouverte avec inversion</td>
+                        <td>"Où vas-tu ?"</td>
+                    </tr>
+                    
+                    <tr>
+                        <td><strong>Sujet + ne + Verbe + pas</strong></td>
+                        <td>Négation simple</td>
+                        <td>"Il ne parle pas français."</td>
+                    </tr>
+                    
+                    <tr>
+                        <td><strong>Pronom + Verbe + Complément</strong></td>
+                        <td>Phrase avec pronom sujet</td>
+                        <td>"Elle achète du pain."</td>
+                    </tr>
+                    
+                    <tr>
+                        <td><strong>Sujet + Verbe + COD + COI</strong></td>
+                        <td>Phrase avec deux compléments</td>
+                        <td>"Paul donne un livre à sa sœur."</td>
+                    </tr>
+                    
+                    <tr>
+                        <td><strong>Adverbe + Sujet + Verbe</strong></td>
+                        <td>Phrase commençant par un adverbe</td>
+                        <td>"Souvent, nous regardons la télé."</td>
+                    </tr>
+                    
+                    <tr>
+                        <td><strong>Il y a + Complément</strong></td>
+                        <td>Expression d'existence</td>
+                        <td>"Il y a du lait dans le frigo."</td>
+                    </tr>
+                    
+                </tbody>
+            </table>
+            <p class="table-note">L'ordre des mots en français est généralement fixe : Sujet-Verbe-Complément. Les questions et la négation modifient cet ordre selon des règles précises.</p>
+        </div>
+
+        <!-- Usage Section -->
+        <div>
+            <div class="section-title">
+                <span>⚡</span>
+                Quand l'utiliser ?
+            </div>
+            <div class="usage-blocks">
+                
+                <div class="usage-block">
+                    <h3>Phrases déclaratives</h3>
+                    <p>Structure standard pour exprimer une information ou un fait</p>
+                    <p class="example">"Les enfants jouent dans le jardin."</p>
+                </div>
+                
+                <div class="usage-block">
+                    <h3>Phrases interrogatives</h3>
+                    <p>Pour poser une question, plusieurs structures possibles</p>
+                    <p class="example">"Tu aimes le chocolat ?" ou "Qu'est-ce que tu fais ?"</p>
+                </div>
+                
+                <div class="usage-block">
+                    <h3>Phrases négatives</h3>
+                    <p>La négation encadre le verbe avec 'ne... pas'</p>
+                    <p class="example">"Nous n'habitons pas ici."</p>
+                </div>
+                
+            </div>
+            <p class="usage-note">L'ordre Sujet-Verbe-Complément est la base du français. Les questions peuvent utiliser l'intonation, 'est-ce que' ou l'inversion sujet-verbe selon le niveau de langue.</p>
+        </div>
+
+        <!-- Key Points -->
+        <div>
+            <div class="section-title">
+                <span>✅</span>
+                Points essentiels à retenir
+            </div>
+            <div class="key-points">
+                
+                <div class="key-point">
+                    <h4>Position du sujet</h4>
+                    <p>Le sujet se place toujours avant le verbe en phrase affirmative :<br><br>• "Je mange" (pronom sujet)<br>• "Marie mange" (nom sujet)<br>• "Mon frère mange" (groupe nominal sujet)</p>
+                </div>
+                
+                <div class="key-point">
+                    <h4>Place des compléments</h4>
+                    <p>Les compléments suivent généralement le verbe :<br><br>• COD : "Il lit un livre"<br>• COI : "Elle parle à Pierre"<br>• COD + COI : "Je donne un cadeau à maman"</p>
+                </div>
+                
+                <div class="key-point">
+                    <h4>Formation des questions</h4>
+                    <p>Trois façons principales de questionner :<br><br>• Intonation : "Tu viens ?"<br>• Est-ce que : "Est-ce que tu viens ?"<br>• Inversion : "Viens-tu ?"</p>
+                </div>
+                
+            </div>
+        </div>
+
+        <!-- Tip Section -->
+        <div class="tip-section">
+            <div class="section-title">
+                <span>💡</span>
+                Astuce pour ne jamais se tromper
+            </div>
+            
+            <div class="tip-box">
+                <h3>📱 Le truc mnémotechnique</h3>
+                <p>Mémorisez l'ordre <strong>S.V.C.</strong> : <strong>Sujet + Verbe + Complément</strong><br><br>Pour les questions, pensez à <strong>'Est-ce que'</strong> au début = question facile ! <br><br>"Est-ce que tu comprends ?" au lieu de "Comprends-tu ?"</p>
+            </div>
+
+            <div class="steps-grid">
+                
+                <div class="step">
+                    <div class="step-num">01</div>
+                    <div class="step-title">Identifiez le sujet</div>
+                    <div class="step-desc">Qui ou quoi fait l'action ? (personne, animal, chose)</div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-num">02</div>
+                    <div class="step-title">Placez le verbe</div>
+                    <div class="step-desc">L'action ou l'état, toujours après le sujet</div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-num">03</div>
+                    <div class="step-title">Ajoutez les compléments</div>
+                    <div class="step-desc">D'abord le COD, puis le COI si nécessaire</div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-num">04</div>
+                    <div class="step-title">Vérifiez l'ordre</div>
+                    <div class="step-desc">Sujet + Verbe + Compléments = phrase correcte</div>
+                </div>
+                
+            </div>
+
+            <div class="error-box">
+                <strong>Erreur courante à éviter :</strong> Attention à ne pas calquer l'ordre des mots de votre langue ! En français, l'ordre est assez rigide 😊
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-badge">Made by FrenchVibes.tw</div>
+        </div>
+    </div>
+</body>
+</html>
